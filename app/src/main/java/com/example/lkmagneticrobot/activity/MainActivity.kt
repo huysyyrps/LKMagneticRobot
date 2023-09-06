@@ -8,8 +8,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
-import com.example.lkmagneticrobot.databinding.ActivityMainBinding
 import com.example.lkmagneticrobot.constant.BaseBindingActivity
+import com.example.lkmagneticrobot.databinding.ActivityMainBinding
 import com.example.lkmagneticrobot.util.Constant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
