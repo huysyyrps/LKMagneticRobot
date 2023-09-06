@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        tools:context=".activity.MainActivity">
+
+    <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+        <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="fitXY"
+                tools:ignore="NestedWeights" />
+        <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                tools:ignore="NestedWeights" />
+
+    </LinearLayout>
+
+    <View
+            style="@style/Vine"
+            android:layout_width="3dp"
+            android:layout_margin="4dp" />
+
+    <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="4dp"
+                android:layout_weight="0.7"
+                app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                <com.example.lkmagneticrobot.view.BaseTitle
+                        android:layout_width="match_parent"
+                        android:layout_height="25dp"
+                        app:text_header_is_left_iv_visiable="true"
+                        app:text_header_title="@string/work_data" />
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/work_current" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:enabled="false"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/work_voltage" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:enabled="false"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/travel_distance" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:enabled="false"
+                                android:inputType="number" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="4dp"
+                android:layout_weight="1.2"
+                app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                <com.example.lkmagneticrobot.view.BaseTitle
+                        android:layout_width="match_parent"
+                        android:layout_height="25dp"
+                        app:text_header_is_left_iv_visiable="true"
+                        app:text_header_title="@string/show_control" />
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/yoke_control" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/yoke_up"
+                                app:kswTextOn="@string/yoke_down"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/magnetic_control" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/close"
+                                app:kswTextOn="@string/open"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/searchlight_control" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/close"
+                                app:kswTextOn="@string/open"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/solenoid_control" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/close"
+                                app:kswTextOn="@string/open"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/black_white_control" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/light_black"
+                                app:kswTextOn="@string/light_white"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:visibility="invisible">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="333" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/light_black"
+                                app:kswTextOn="@string/light_white"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="4dp"
+                android:layout_weight="1.8"
+                app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                <com.example.lkmagneticrobot.view.BaseTitle
+                        android:layout_width="match_parent"
+                        android:layout_height="25dp"
+                        app:text_header_is_left_iv_visiable="true"
+                        app:text_header_title="@string/parameter_settings" />
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/protect_voltage" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/protect_current" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/run_speed" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/run_distance" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/magnetic_interval" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/magnetic_time" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/magnetic_voltage" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/magnetic_rate" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:visibility="invisible">
+
+                        <TextView style="@style/TextName" />
+
+                        <EditText
+                                style="@style/EditText"
+                                android:inputType="number" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="4dp"
+                android:layout_weight="0.7"
+                app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                <com.example.lkmagneticrobot.view.BaseTitle
+                        android:layout_width="match_parent"
+                        android:layout_height="25dp"
+                        app:text_header_is_left_iv_visiable="true"
+                        app:text_header_title="@string/function_buttons" />
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                    <com.example.lkmagneticrobot.view.BaseButton
+                            style="@style/EditText"
+                            android:gravity="center"
+                            android:text="@string/camer"
+                            app:bg_corner="10dp" />
+
+                    <com.example.lkmagneticrobot.view.BaseButton
+                            style="@style/EditText"
+                            android:layout_marginLeft="20dp"
+                            android:gravity="center"
+                            android:text="@string/video"
+                            app:bg_corner="10dp" />
+
+                    <com.example.lkmagneticrobot.view.BaseButton
+                            style="@style/EditText"
+                            android:layout_marginLeft="20dp"
+                            android:gravity="center"
+                            android:text="@string/folder"
+                            app:bg_corner="10dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</LinearLayout>

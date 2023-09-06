@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">磁粉机器人</string>
+    <string name="show_control">控制显示</string>
+    <string name="yoke_up">抬起</string>
+    <string name="yoke_down">落下</string>
+    <string name="open">开启</string>
+    <string name="close">关闭</string>
+    <string name="light_black">黑光</string>
+    <string name="light_white">白光</string>
+    <string name="yoke_control">磁轭控制</string>
+    <string name="magnetic_control">磁化控制</string>
+    <string name="searchlight_control">探照灯控制</string>
+    <string name="solenoid_control">电磁阀控制</string>
+    <string name="black_white_control">黑白光控制</string>
+    <string name="work_data">工作数据</string>
+    <string name="work_current">工作电流</string>
+    <string name="work_voltage">工作电压</string>
+    <string name="travel_distance">行进距离</string>
+    <string name="parameter_settings">参数设置</string>
+    <string name="protect_voltage">保护电压</string>
+    <string name="protect_current">保护电流</string>
+    <string name="run_speed">运行速度</string>
+    <string name="run_distance">运行距离</string>
+    <string name="magnetic_interval">磁化间隔</string>
+    <string name="magnetic_time">磁化时间</string>
+    <string name="magnetic_voltage">磁化电压</string>
+    <string name="magnetic_rate">磁化频率</string>
+    <string name="function_buttons">功能按键</string>
+    <string name="camer">拍摄</string>
+    <string name="video">录制</string>
+    <string name="folder">文件夹</string>
+</resources>
