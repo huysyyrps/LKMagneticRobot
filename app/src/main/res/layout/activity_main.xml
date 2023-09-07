@@ -487,6 +487,7 @@
                         android:orientation="horizontal">
 
                     <com.example.lkmagneticrobot.view.BaseButton
+                            android:id="@+id/btnCamer"
                             style="@style/EditText"
                             android:layout_width="0dp"
                             android:layout_weight="1"
@@ -495,6 +496,7 @@
                             app:bg_corner="10dp" />
 
                     <com.example.lkmagneticrobot.view.BaseButton
+                            android:id="@+id/btnVideo"
                             style="@style/EditText"
                             android:layout_width="0dp"
                             android:layout_weight="1"
@@ -503,6 +505,7 @@
                             app:bg_corner="10dp" />
 
                     <com.example.lkmagneticrobot.view.BaseButton
+                            android:id="@+id/btnFile"
                             style="@style/EditText"
                             android:layout_width="0dp"
                             android:layout_weight="1"

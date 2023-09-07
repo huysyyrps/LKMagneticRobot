@@ -1,26 +1,30 @@
 package com.example.lkmagneticrobot.activity
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.example.lkmagneticrobot.R
 import com.example.lkmagneticrobot.YoloV5Ncnn
 import com.example.lkmagneticrobot.constant.BaseBindingActivity
+import com.example.lkmagneticrobot.constant.Constant
 import com.example.lkmagneticrobot.databinding.ActivityMainBinding
-import com.example.lkmagneticrobot.util.BasePaint
-import com.example.lkmagneticrobot.util.Constant
-import com.example.lkmagneticrobot.util.LogUtil
+import com.example.lkmagneticrobot.util.PermissionallBack
+import com.example.lkmagneticrobot.util.dialog.DialogUtil
+import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil
 import com.example.lkmagneticrobot.util.showToast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -34,6 +38,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
     private var width: Int = 0
     private var height: Int = 0
     private val yolov5ncnn = YoloV5Ncnn()
+    private lateinit var mediaManager: MediaProjectionManager
+    private var mMediaProjection: MediaProjection? = null
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action === KeyEvent.ACTION_DOWN) {
@@ -49,6 +55,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
         return super.onKeyDown(keyCode, event)
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,27 +65,37 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
             "yolov5ncnn Init failed".showToast(this)
             return
         }
-        object : Thread() {
-            override fun run() {
-                while (runing) {
-                    getVideoPhoto()
-                }
-            }
-        }.start()
+        //是否通过全部权限
+        DialogUtil().requestPermission(this,object : PermissionallBack {
+            override fun permissionState(state: Boolean) {
+                object : Thread() {
+                    override fun run() {
+                        while (runing) {
+                            getVideoPhoto()
+                        }
+                    }
+                }.start()
 
-        //设置播放地址
-        binding.fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
-        //开始播放
-        binding.fpvWidget.start()
+                //设置播放地址
+                binding.fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
+                //开始播放
+                binding.fpvWidget.start()
+            }
+        })
+
         //点击事件
         binding.imageView.setOnClickListener (this)
         binding.fpvWidget.setOnClickListener(this)
+        binding.btnCamer.setOnClickListener(this)
+        binding.btnVideo.setOnClickListener(this)
+        binding.btnFile.setOnClickListener(this)
 
         val wm = this.windowManager
         width = wm.defaultDisplay.width
         height = wm.defaultDisplay.height
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.imageView->{
@@ -103,6 +120,31 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                 linearParams1.height = height
                 linearParams1.width = width/3*2-20
                 binding.fpvWidget.layoutParams = linearParams1
+            }
+            R.id.btnCamer->{
+                mediaManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                if (mMediaProjection == null) {
+                    val captureIntent: Intent = mediaManager.createScreenCaptureIntent()
+                    startActivityForResult(captureIntent, Constant.TAG_ONE)
+                } else {
+                    mMediaProjection?.let {
+                        MediaUtil.captureImages(this@MainActivity, it)
+                    }
+                }
+            }
+            R.id.btnVideo->{
+                mediaManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                if (mMediaProjection == null) {
+                    val captureIntent: Intent = mediaManager.createScreenCaptureIntent()
+                    startActivityForResult(captureIntent, Constant.TAG_TWO)
+                } else {
+                    mMediaProjection?.let {
+                        MediaUtil.startMedia(this@MainActivity, it)
+                    }
+                }
+            }
+            R.id.btnFile->{
+                MediaUtil.stopMedia()
             }
         }
     }
@@ -157,6 +199,24 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
         } catch (ex: Exception) {
             Log.e("XXX", ex.toString())
         } finally {
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("WrongConstant")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                Constant.TAG_ONE -> {
+                    mMediaProjection = data?.let { mediaManager.getMediaProjection(resultCode, it) }
+                    mMediaProjection?.let { MediaUtil.captureImages(this, it) }
+                }
+                Constant.TAG_TWO -> {
+                    mMediaProjection = data?.let { mediaManager.getMediaProjection(resultCode, it) }
+                    mMediaProjection?.let { MediaUtil.startMedia(this, it) }
+                }
+            }
         }
     }
 
