@@ -87,7 +87,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
         binding.imageView.setOnClickListener (this)
         binding.fpvWidget.setOnClickListener(this)
         binding.btnCamer.setOnClickListener(this)
-        binding.btnVideo.setOnClickListener(this)
+        binding.btnStartVideo.setOnClickListener(this)
+        binding.btnStopVideo.setOnClickListener(this)
         binding.btnFile.setOnClickListener(this)
 
         val wm = this.windowManager
@@ -132,7 +133,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                     }
                 }
             }
-            R.id.btnVideo->{
+            R.id.btnStartVideo->{
                 mediaManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                 if (mMediaProjection == null) {
                     val captureIntent: Intent = mediaManager.createScreenCaptureIntent()
@@ -140,11 +141,15 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                 } else {
                     mMediaProjection?.let {
                         MediaUtil.startMedia(this@MainActivity, it)
+                        binding.btnStartVideo.visibility = View.GONE
+                        binding.btnStopVideo.visibility = View.VISIBLE
                     }
                 }
             }
-            R.id.btnFile->{
+            R.id.btnStopVideo->{
                 MediaUtil.stopMedia()
+                binding.btnStartVideo.visibility = View.VISIBLE
+                binding.btnStopVideo.visibility = View.GONE
             }
         }
     }
@@ -215,6 +220,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                 Constant.TAG_TWO -> {
                     mMediaProjection = data?.let { mediaManager.getMediaProjection(resultCode, it) }
                     mMediaProjection?.let { MediaUtil.startMedia(this, it) }
+                    binding.btnStartVideo.visibility = View.GONE
+                    binding.btnStopVideo.visibility = View.VISIBLE
                 }
             }
         }

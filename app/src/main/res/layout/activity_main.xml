@@ -496,13 +496,23 @@
                             app:bg_corner="10dp" />
 
                     <com.example.lkmagneticrobot.view.BaseButton
-                            android:id="@+id/btnVideo"
+                            android:id="@+id/btnStartVideo"
                             style="@style/EditText"
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="@string/video"
                             app:bg_corner="10dp" />
+                    <com.example.lkmagneticrobot.view.BaseButton
+                            android:id="@+id/btnStopVideo"
+                            style="@style/EditText"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/stop"
+                            app:bg_corner="10dp"
+                            android:visibility="gone"
+                            app:bg_color="@color/red"/>
 
                     <com.example.lkmagneticrobot.view.BaseButton
                             android:id="@+id/btnFile"
