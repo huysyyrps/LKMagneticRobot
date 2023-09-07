@@ -46,12 +46,10 @@ class BaseTitle:LinearLayout {
     private fun initAttributes() {
         if (attrs != null) {
             val typedArray: TypedArray = MyApplication.context.obtainStyledAttributes(attrs, R.styleable.BaseTitle)
-            if (typedArray != null) {
-                tvTitle = typedArray.getString(R.styleable.BaseTitle_text_header_title)
-                isTittle = typedArray.getBoolean(R.styleable.BaseTitle_text_header_is_title_visiable, true)
-                isleftIv = typedArray.getBoolean(R.styleable.BaseTitle_text_header_is_left_iv_visiable, true)
-                typedArray.recycle()
-            }
+            tvTitle = typedArray.getString(R.styleable.BaseTitle_text_header_title)
+            isTittle = typedArray.getBoolean(R.styleable.BaseTitle_text_header_is_title_visiable, true)
+            isleftIv = typedArray.getBoolean(R.styleable.BaseTitle_text_header_is_left_iv_visiable, true)
+            typedArray.recycle()
         }
         initView()
     }
