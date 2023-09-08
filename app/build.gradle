@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-android-extensions'
 }
 
 android {
@@ -74,4 +75,13 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:3.2.1'
     //权限申请
     implementation 'com.guolindev.permissionx:permissionx:1.7.1'
+    //上拉刷新下拉加载
+    implementation 'androidx.appcompat:appcompat:1.0.0'//必须 1.0.0 以上
+    implementation  'io.github.scwang90:refresh-layout-kernel:2.0.5'      //核心必须依赖
+    implementation  'io.github.scwang90:refresh-footer-classics:2.0.5'    //经典加载
+    implementation  'io.github.scwang90:refresh-header-classics:2.0.5'    //经典加载
+    //recyclerView
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    //鲁班图片压缩
+    implementation 'top.zibin:Luban:1.1.8'
 }

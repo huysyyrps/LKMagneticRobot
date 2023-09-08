@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        tools:ignore="MissingDefaultResource">
+
+    <include layout="@layout/dialog_item_header" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        android:orientation="vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+        <TextView
+                android:id="@+id/etWorkPipe"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/linelayout_backthemecolor_radion"
+                android:gravity="center_vertical|left"
+                android:hint="@string/remove_sure"
+                android:paddingLeft="10dp"
+                android:textSize="14dp" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:orientation="horizontal"
+            android:layout_gravity="right"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="10dp">
+        <com.example.lkmagneticrobot.view.BaseButton
+                android:id="@+id/btnRemoveCancel"
+                style="@style/BaseButton"
+                app:bg_color="@color/theme_color"
+                app:bg_corner="5dp"
+                android:text="@string/btn_cancel"
+                android:layout_marginRight="20dp"/>
+        <com.example.lkmagneticrobot.view.BaseButton
+                android:id="@+id/btnRemoveSure"
+                style="@style/BaseButton"
+                app:bg_color="@color/theme_color"
+                app:bg_corner="5dp"
+                android:text="@string/btn_sure" />
+    </LinearLayout>
+</LinearLayout>

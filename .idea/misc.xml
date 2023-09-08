@@ -3,8 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/drawable/linelayout_backthemecolor_radion.xml" value="0.221" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/activity_image.xml" value="0.3380208333333333" />
         <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/activity_video_list.xml" value="0.2635416666666667" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/adapter_imagelist.xml" value="0.3380208333333333" />
         <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/base_title.xml" value="0.20199275362318841" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/dialog_item_header.xml" value="0.3380208333333333" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/layout/dialog_remove.xml" value="0.45727482678983833" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/menu/dialog.xml" value="0.2635416666666667" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/menu/menu.xml" value="0.3380208333333333" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/menu/menu_main.xml" value="0.2635416666666667" />
+        <entry key="..\:/LuKe-item/LKMagneticRobot/app/src/main/res/xml/provider_paths.xml" value="0.2677083333333333" />
       </map>
     </option>
   </component>

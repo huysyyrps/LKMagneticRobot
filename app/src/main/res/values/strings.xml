@@ -1,4 +1,6 @@
 <resources>
+    <string name="btn_sure">确定</string>
+    <string name="btn_cancel">取消</string>
     <string name="app_name">磁粉机器人</string>
     <string name="show_control">控制显示</string>
     <string name="yoke_up">抬起</string>
@@ -33,4 +35,8 @@
 
     <string name="save_success">保存成功</string>
     <string name="save_fail">保存失败</string>
+    <string name="image_list">图片列表</string>
+    <string name="video_list">视频列表</string>
+    <string name="no_data">暂无数据</string>
+    <string name="remove_sure">您确定要删除此项数据吗？</string>
 </resources>

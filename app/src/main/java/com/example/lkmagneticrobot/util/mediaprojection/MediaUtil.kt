@@ -40,11 +40,12 @@ object MediaUtil {
                 ).apply {
                     setOnImageAvailableListener({
                         //这里页面帧发生变化时就会回调一次，我们只需要获取一张图片，加个标记位，避免重复
-                        if (!isGot) {
-                            isGot = true
-                            //这里就可以保存图片了
-                            savePicTask(it,activity,mMediaProjection)
-                        }
+//                        if (!isGot) {
+//                            isGot = true
+//                            //这里就可以保存图片了
+//                            savePicTask(it,activity,mMediaProjection)
+//                        }
+                        savePicTask(it,activity,mMediaProjection)
                     }, null)
 
                     //把内容投射到ImageReader 的surface
@@ -93,7 +94,7 @@ object MediaUtil {
             else
                 MyApplication.context.resources.getString(R.string.save_fail).showToast(activity)
 
-            mMediaProjection?.stop()
+//            mMediaProjection?.stop()
             imageReader?.close()
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -134,6 +135,7 @@ object MediaUtil {
     fun stopMedia() {
         if (mediaRecorder != null) {
             mediaRecorder?.stop()
+            mediaRecorder==null
         }
     }
 }

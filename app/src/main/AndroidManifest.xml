@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.example.lkmagneticrobot">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
             android:name=".MyApplication"
@@ -16,6 +18,29 @@
             android:supportsRtl="true"
             android:theme="@style/NoAction"
             android:usesCleartextTraffic="true">
+        <activity
+                android:name=".activity.VideoListActivity"
+                android:exported="false" />
+        <activity
+                android:name=".activity.ImageListActivity"
+                android:exported="false" />
+
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="com.example.lkmagneticrobot.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths" />
+        </provider>
+
+        <service
+                android:name=".util.mediaprojection.MediaService"
+                android:enabled="true"
+                android:exported="true"
+                android:foregroundServiceType="mediaProjection" />
+
         <activity
                 android:name=".activity.MainActivity"
                 android:exported="true">

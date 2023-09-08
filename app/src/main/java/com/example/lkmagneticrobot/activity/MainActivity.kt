@@ -21,19 +21,22 @@ import com.example.lkmagneticrobot.YoloV5Ncnn
 import com.example.lkmagneticrobot.constant.BaseBindingActivity
 import com.example.lkmagneticrobot.constant.Constant
 import com.example.lkmagneticrobot.databinding.ActivityMainBinding
+import com.example.lkmagneticrobot.util.MainUi
 import com.example.lkmagneticrobot.util.PermissionallBack
 import com.example.lkmagneticrobot.util.dialog.DialogUtil
 import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil
 import com.example.lkmagneticrobot.util.showToast
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.system.exitProcess
 
+
 //, View.OnClickListener
-class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickListener{
+class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickListener {
     var runing = true
-    lateinit var bmp:Bitmap
+    lateinit var bmp: Bitmap
     private var exitTime: Long = 0
     private var width: Int = 0
     private var height: Int = 0
@@ -66,7 +69,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
             return
         }
         //是否通过全部权限
-        DialogUtil().requestPermission(this,object : PermissionallBack {
+        DialogUtil().requestPermission(this, object : PermissionallBack {
             override fun permissionState(state: Boolean) {
                 object : Thread() {
                     override fun run() {
@@ -84,7 +87,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
         })
 
         //点击事件
-        binding.imageView.setOnClickListener (this)
+        binding.imageView.setOnClickListener(this)
         binding.fpvWidget.setOnClickListener(this)
         binding.btnCamer.setOnClickListener(this)
         binding.btnStartVideo.setOnClickListener(this)
@@ -98,31 +101,31 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onClick(v: View?) {
-        when(v?.id){
-            R.id.imageView->{
-                val linearParams =  binding.fpvWidget.layoutParams
+        when (v?.id) {
+            R.id.imageView -> {
+                val linearParams = binding.fpvWidget.layoutParams
                 linearParams.height = 200
                 linearParams.width = 300
                 binding.fpvWidget.bringToFront()
                 binding.fpvWidget.layoutParams = linearParams
-                val linearParams1 =  binding.imageView.layoutParams
+                val linearParams1 = binding.imageView.layoutParams
                 linearParams1.height = height
-                linearParams1.width = width/3*2-20
+                linearParams1.width = width / 3 * 2 - 20
                 binding.imageView.layoutParams = linearParams1
             }
-            R.id.fpvWidget->{
-                val linearParams =  binding.imageView.layoutParams
+            R.id.fpvWidget -> {
+                val linearParams = binding.imageView.layoutParams
                 linearParams.height = 200
                 linearParams.width = 300
                 binding.imageView.bringToFront()
                 binding.imageView.layoutParams = linearParams
 
-                val linearParams1 =  binding.fpvWidget.layoutParams
+                val linearParams1 = binding.fpvWidget.layoutParams
                 linearParams1.height = height
-                linearParams1.width = width/3*2-20
+                linearParams1.width = width / 3 * 2 - 20
                 binding.fpvWidget.layoutParams = linearParams1
             }
-            R.id.btnCamer->{
+            R.id.btnCamer -> {
                 mediaManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                 if (mMediaProjection == null) {
                     val captureIntent: Intent = mediaManager.createScreenCaptureIntent()
@@ -133,7 +136,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                     }
                 }
             }
-            R.id.btnStartVideo->{
+            R.id.btnStartVideo -> {
                 mediaManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                 if (mMediaProjection == null) {
                     val captureIntent: Intent = mediaManager.createScreenCaptureIntent()
@@ -146,13 +149,17 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                     }
                 }
             }
-            R.id.btnStopVideo->{
+            R.id.btnStopVideo -> {
                 MediaUtil.stopMedia()
                 binding.btnStartVideo.visibility = View.VISIBLE
                 binding.btnStopVideo.visibility = View.GONE
             }
+            R.id.btnFile -> {
+                MainUi.showPopupMenu(binding.btnFile, "Desc", this)
+            }
         }
     }
+
 
     private fun getVideoPhoto() {
         try {
