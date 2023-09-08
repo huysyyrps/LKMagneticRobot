@@ -21,12 +21,12 @@ import com.example.lkmagneticrobot.YoloV5Ncnn
 import com.example.lkmagneticrobot.constant.BaseBindingActivity
 import com.example.lkmagneticrobot.constant.Constant
 import com.example.lkmagneticrobot.databinding.ActivityMainBinding
-import com.example.lkmagneticrobot.util.MainUi
-import com.example.lkmagneticrobot.util.PermissionallBack
+import com.example.lkmagneticrobot.util.*
 import com.example.lkmagneticrobot.util.dialog.DialogUtil
 import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil
-import com.example.lkmagneticrobot.util.showToast
+import com.skydroid.fpvlibrary.serial.SerialPortConnection
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -38,11 +38,11 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
     var runing = true
     lateinit var bmp: Bitmap
     private var exitTime: Long = 0
-    private var width: Int = 0
-    private var height: Int = 0
     private val yolov5ncnn = YoloV5Ncnn()
     private lateinit var mediaManager: MediaProjectionManager
     private var mMediaProjection: MediaProjection? = null
+    //硬件串口连接实例
+    private var mServiceConnection: SerialPortConnection? = null
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action === KeyEvent.ACTION_DOWN) {
@@ -78,13 +78,16 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                         }
                     }
                 }.start()
-
-                //设置播放地址
-                binding.fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
-                //开始播放
-                binding.fpvWidget.start()
             }
         })
+        //设置播放地址
+        binding.fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
+        //开始播放
+        binding.fpvWidget.start()
+        //使用硬解
+        fpvWidget?.usingMediaCodec = true
+//        //使用软解
+//        fpvWidget?.usingMediaCodec = false
 
         //点击事件
         binding.imageView.setOnClickListener(this)
@@ -94,9 +97,30 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
         binding.btnStopVideo.setOnClickListener(this)
         binding.btnFile.setOnClickListener(this)
 
-        val wm = this.windowManager
-        width = wm.defaultDisplay.width
-        height = wm.defaultDisplay.height
+        initConnect()
+    }
+
+    private fun initConnect() {
+        //硬件串口实例
+        mServiceConnection = SerialPortConnection.newBuilder("/dev/ttyMSM1", 57600)
+            .flags(1 shl 13)
+            .build()
+        mServiceConnection?.setDelegate(object : SerialPortConnection.Delegate {
+            override fun received(bytes: ByteArray, size: Int) {
+                var stringData = BinaryChange.ByteToString(bytes)
+                Log.e("TAG", stringData)
+            }
+
+            override fun connect() {}
+        })
+        try {
+            //打开串口
+            mServiceConnection?.openConnection()
+            LogUtil.e("TAG", "连接成功")
+//            mServiceConnection.sendData("".toByteArray())
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -109,8 +133,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                 binding.fpvWidget.bringToFront()
                 binding.fpvWidget.layoutParams = linearParams
                 val linearParams1 = binding.imageView.layoutParams
-                linearParams1.height = height
-                linearParams1.width = width / 3 * 2 - 20
+                linearParams1.height = 1200
+                linearParams1.width = 1920 / 3 * 2 - 20
                 binding.imageView.layoutParams = linearParams1
             }
             R.id.fpvWidget -> {
@@ -121,8 +145,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                 binding.imageView.layoutParams = linearParams
 
                 val linearParams1 = binding.fpvWidget.layoutParams
-                linearParams1.height = height
-                linearParams1.width = width / 3 * 2 - 20
+                linearParams1.height = 1200
+                linearParams1.width = 1920 / 3 * 2 - 20
                 binding.fpvWidget.layoutParams = linearParams1
             }
             R.id.btnCamer -> {
@@ -178,33 +202,35 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
             inputstream = conn.inputStream
             //创建出一个bitmap
             bmp = BitmapFactory.decodeStream(inputstream)
-            var objects: Array<YoloV5Ncnn.Obj>
-            /**
-             * CoroutineScope(Dispatchers.Main).launch {
-            objects = yolov5ncnn.Detect(bmp, false)
-            if (objects == null || objects.isEmpty()) {
-            binding.imageView.setImageBitmap(bmp)
-            }else{
-            val rgba = bmp.copy(Bitmap.Config.ARGB_8888, true)
-            val canvas = Canvas(rgba)
-            for (i in objects!!.indices) {
-            canvas.drawRect(objects[i].x,
-            objects[i].y, objects[i].x + objects[i].w, objects[i].y + objects[i].h, BasePaint.getLinePaint())
-            val text = objects[i].label + " = " + String.format("%.1f", objects[i].prob * 100) + "%"
-            val text_width: Float = BasePaint.getTextpaint().measureText(text) + 10
-            val text_height: Float = -BasePaint.getTextpaint().ascent() + BasePaint.getTextpaint().descent() + 10
-            var x = objects[i].x
-            var y = objects[i].y - text_height
-            if (y < 0) y = 0f
-            if (x + text_width > rgba.width) x = rgba.width - text_width
-            canvas.drawText(text, x, y - BasePaint.getTextpaint().ascent(),
-            BasePaint.getTextpaint()
-            )
-            }
-            binding.imageView.setImageBitmap(rgba)
-            }
-            }
-             */
+//            var objects: Array<YoloV5Ncnn.Obj>
+//            CoroutineScope(Dispatchers.Main).launch {
+//                objects = yolov5ncnn.Detect(bmp, false)
+//                if (objects == null || objects.isEmpty()) {
+//                    binding.imageView.setImageBitmap(bmp)
+//                } else {
+//                    val rgba = bmp.copy(Bitmap.Config.ARGB_8888, true)
+//                    val canvas = Canvas(rgba)
+//                    for (i in objects!!.indices) {
+//                        canvas.drawRect(
+//                            objects[i].x,
+//                            objects[i].y, objects[i].x + objects[i].w, objects[i].y + objects[i].h, BasePaint.getLinePaint()
+//                        )
+//                        val text = objects[i].label + " = " + String.format("%.1f", objects[i].prob * 100) + "%"
+//                        val text_width: Float = BasePaint.getTextpaint().measureText(text) + 10
+//                        val text_height: Float = -BasePaint.getTextpaint().ascent() + BasePaint.getTextpaint().descent() + 10
+//                        var x = objects[i].x
+//                        var y = objects[i].y - text_height
+//                        if (y < 0) y = 0f
+//                        if (x + text_width > rgba.width) x = rgba.width - text_width
+//                        canvas.drawText(
+//                            text, x, y - BasePaint.getTextpaint().ascent(),
+//                            BasePaint.getTextpaint()
+//                        )
+//                    }
+//                    binding.imageView.setImageBitmap(rgba)
+//                }
+//            }
+
             binding.imageView.setImageBitmap(bmp)
             //关闭HttpURLConnection连接
             conn.disconnect()
@@ -237,6 +263,14 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
     override fun onDestroy() {
         super.onDestroy()
         binding.fpvWidget.stop()
+        if (mServiceConnection != null) {
+            try {
+                mServiceConnection!!.closeConnection()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        mServiceConnection = null
     }
 
 }
