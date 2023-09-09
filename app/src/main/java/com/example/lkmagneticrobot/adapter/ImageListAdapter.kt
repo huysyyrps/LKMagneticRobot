@@ -9,9 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lkmagneticrobot.R
 import com.example.lkmagneticrobot.util.AdapterPositionCallBack
+import java.io.File
 
 internal class ImageListAdapter(
-    var dataList: ArrayList<String>,
+    var dataList: List<File?>,
     var selectIndex: Int,
     var context: Activity,
     val adapterPositionCallBack: AdapterPositionCallBack
@@ -35,7 +36,7 @@ internal class ImageListAdapter(
         return viewHolder
     }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tvName.text = dataList[position]
+        holder.tvName.text = dataList[position]?.name
         if (position==selectIndex){
             holder.tvName.setBackgroundColor(context.resources.getColor(R.color.theme_color))
         }else{

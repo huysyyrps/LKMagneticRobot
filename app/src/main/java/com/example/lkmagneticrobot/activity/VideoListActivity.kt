@@ -17,6 +17,7 @@ import com.example.lkmagneticrobot.constant.BaseBindingActivity
 import com.example.lkmagneticrobot.constant.Constant
 import com.example.lkmagneticrobot.databinding.ActivityVideoListBinding
 import com.example.lkmagneticrobot.util.AdapterPositionCallBack
+import com.example.lkmagneticrobot.util.FileGet
 import com.example.lkmagneticrobot.util.LogUtil
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
@@ -32,8 +33,7 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
     private var longTimeCurrent:Long? = 0
     var timer:Timer? = null
     private lateinit var dialog: MaterialDialog
-    private var pathList = ArrayList<String>()
-    private lateinit var filePath: File
+    lateinit var fileList : MutableList<File>
     private lateinit var adapter: ImageListAdapter
 
     companion object{
@@ -68,38 +68,38 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
             dialog.btnRemoveSure.setOnClickListener {
                 if (selectIndex == 0) {
                     //如果只有一条数据删除后显示暂无数据图片，隐藏listview
-                    if (pathList.size == 1) {
-                        val file = File("${filePath}/${pathList[selectIndex]}")
+                    if (fileList.size == 1) {
+                        val file = fileList[selectIndex]
                         file.delete()
-                        pathList.removeAt(selectIndex)
+                        fileList.removeAt(selectIndex)
                         binding.linNoData.visibility = View.VISIBLE
                         binding.linData.visibility = View.GONE
                     } else {
-                        val file = File("${filePath}/${pathList[selectIndex]}")
+                        val file = fileList[selectIndex]
                         file.delete()
-                        pathList.removeAt(selectIndex)
+                        fileList.removeAt(selectIndex)
                         adapter.notifyDataSetChanged()
-                        var path = "${filePath}/${pathList[selectIndex]}"
-                        setVideo(path)
+//                        var path = "${fileList[selectIndex].path}"
+                        setVideo(fileList[selectIndex])
                     }
-                } else if (selectIndex == pathList.size - 1) {
-                    val file = File("${filePath}/${pathList[selectIndex]}")
+                } else if (selectIndex == fileList.size - 1) {
+                    val file = fileList[selectIndex]
                     file.delete()
-                    pathList.removeAt(selectIndex)
+                    fileList.removeAt(selectIndex)
                     --selectIndex
                     adapter.setSelectIndex(selectIndex)
                     adapter.notifyDataSetChanged()
-                    var path = "${filePath}/${pathList[selectIndex]}"
-                    setVideo(path)
-                } else if (selectIndex < pathList.size - 1 && selectIndex > 0) {
-                    val file = File("${filePath}/${pathList[selectIndex]}")
+//                    var path = "${fileList[selectIndex].path}"
+                    setVideo(fileList[selectIndex])
+                } else if (selectIndex < fileList.size - 1 && selectIndex > 0) {
+                    val file = fileList[selectIndex]
                     file.delete()
-                    pathList.removeAt(selectIndex)
+                    fileList.removeAt(selectIndex)
                     --selectIndex
                     adapter.setSelectIndex(selectIndex)
                     adapter.notifyDataSetChanged()
-                    var path = "${filePath}/${pathList[selectIndex]}"
-                    setVideo(path)
+//                    var path = fileList[selectIndex].path
+                    setVideo(fileList[selectIndex])
                 }
                 dialog.dismiss()
             }
@@ -136,52 +136,37 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
     //获取数据列表
     private fun getFileList() {
         /**将文件夹下所有文件名存入数组*/
-        filePath = File(this.externalCacheDir.toString()+ "/" + Constant.SAVE_VIDEO_PATH + "/")
-
-        if (filePath==null||filePath.list()==null){
-            binding.linNoData.visibility = View.VISIBLE
-            binding.linData.visibility = View.GONE
-            return
-        }
-        if (filePath.list().isEmpty()) {
+        fileList = FileGet.listFileSortByModifyTime(this.externalCacheDir.toString() + "/" + Constant.SAVE_VIDEO_PATH + "/").reversed() as MutableList<File>
+        if (fileList.isNullOrEmpty()) {
             binding.linNoData.visibility = View.VISIBLE
             binding.linData.visibility = View.GONE
         } else {
-            if (filePath.list().size > 1) {
-                pathList = filePath.list().toList().reversed() as ArrayList<String>
-            } else if (filePath.list().size == 1) {
-                pathList.clear()
-                pathList.add(filePath.list()[0])
-            }
             binding.linNoData.visibility = View.GONE
             binding.linData.visibility = View.VISIBLE
             adapter = ImageListAdapter(
-                pathList,
+                fileList,
                 selectIndex,
                 this,
                 object : AdapterPositionCallBack {
                     override fun backPosition(index: Int) {
                         selectIndex = index
                         timer?.cancel()
-                        var path = "${filePath}/${pathList[index]}"
                         binding.videoView.visibility = View.GONE
                         binding.imageView.visibility = View.VISIBLE
-                        setVideo(path)
+                        setVideo(fileList[selectIndex])
                     }
                 })
             binding.recyclerView.adapter = adapter
-            var path = "${filePath}/${pathList[selectIndex]}"
-            setVideo(path)
+            setVideo(fileList[selectIndex])
             adapter.notifyDataSetChanged()
             binding.smartRefreshLayout?.finishLoadMore()
             binding.smartRefreshLayout?.finishRefresh()
         }
     }
 
-    private fun setVideo(path: String) {
-        var file = File(path)
+    private fun setVideo(file: File) {
         binding.imageView.setImageBitmap(getRingBitmap(file))
-        binding.videoView.setVideoPath(path)
+        binding.videoView.setVideoPath(file.path)
         binding.tvFileName.text = file.name
         longTime = getRingDuring(file)
         longTimeCurrent = longTime
