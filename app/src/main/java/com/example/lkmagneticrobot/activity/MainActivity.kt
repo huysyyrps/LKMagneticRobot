@@ -30,6 +30,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.system.exitProcess
 
 
@@ -43,6 +45,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
     private var mMediaProjection: MediaProjection? = null
     //硬件串口连接实例
     private var mServiceConnection: SerialPortConnection? = null
+    val timer = Timer()
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action === KeyEvent.ACTION_DOWN) {
@@ -98,6 +101,12 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
         binding.btnFile.setOnClickListener(this)
 
         initConnect()
+
+        //定时读取
+        timer.scheduleAtFixedRate(0, 1000*60) {
+            binding.fpvWidget.invalidate()
+            LogUtil.e("TAG","1111")
+        }
     }
 
     private fun initConnect() {
