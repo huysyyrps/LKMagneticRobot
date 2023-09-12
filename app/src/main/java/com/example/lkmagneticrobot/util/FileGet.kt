@@ -5,7 +5,7 @@ import java.util.*
 
 object FileGet {
     fun listFileSortByModifyTime(path: String): MutableList<File> {
-        val list: MutableList<File> = getFiles(path, ArrayList<File>())
+        val list: MutableList<File> = getFiles(path, mutableListOf())
         if (list != null && list.size > 0) {
             list.sortWith(Comparator { file, newFile ->
                 if (file?.lastModified()!! < newFile?.lastModified()!!) {

@@ -9,6 +9,7 @@ import com.example.lkmagneticrobot.activity.ImageListActivity
 import com.example.lkmagneticrobot.activity.VideoListActivity
 
 object MainUi {
+    @JvmStatic
     fun showPopupMenu(view: View?, tag: String?, context: Context) {
         // View当前PopupMenu显示的相对View的位置
         val popupMenu = PopupMenu(context, view)

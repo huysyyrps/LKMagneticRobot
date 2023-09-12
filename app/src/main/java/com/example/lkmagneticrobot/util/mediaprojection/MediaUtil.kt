@@ -1,6 +1,7 @@
 package com.example.lkmagneticrobot.util.mediaprojection
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
@@ -28,32 +29,37 @@ object MediaUtil {
     private var mVirtualDisplay: VirtualDisplay? = null
     private var isGot: Boolean = false
     @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("WrongConstant")
-    fun captureImages(activity: MainActivity, mMediaProjection:MediaProjection){
-        Handler(Looper.myLooper()!!).postDelayed(object : Runnable {
-            override fun run() {
-                //配置ImageReader
-                val dm = activity.resources.displayMetrics
-                imageReader = ImageReader.newInstance(
-                    dm.widthPixels, dm.heightPixels-60,
-                    PixelFormat.RGBA_8888, 1
-                ).apply {
-                    setOnImageAvailableListener({
-                        //这里页面帧发生变化时就会回调一次，我们只需要获取一张图片，加个标记位，避免重复
-//                        if (!isGot) {
-//                            isGot = true
-//                            //这里就可以保存图片了
-//                            savePicTask(it,activity,mMediaProjection)
-//                        }
-                        savePicTask(it,activity,mMediaProjection)
-                    }, null)
+    @SuppressLint("WrongConstant", "Range")
+    @JvmStatic
+    open fun captureImages(activity: Activity, mMediaProjection:MediaProjection, tag:String){
+        Handler(Looper.myLooper()!!).postDelayed({
+            //配置ImageReader
+            val dm = activity.resources.displayMetrics
+            var height = 0
+            if (tag=="main"){
+                height = dm.heightPixels-60
+            }else if (tag=="usb"){
+                height = dm.heightPixels
+            }
+            imageReader = ImageReader.newInstance(
+                dm.widthPixels, height,
+                PixelFormat.RGBA_8888, 1
+            ).apply {
+                setOnImageAvailableListener({
+                    //这里页面帧发生变化时就会回调一次，我们只需要获取一张图片，加个标记位，避免重复
+                    //                        if (!isGot) {
+                    //                            isGot = true
+                    //                            //这里就可以保存图片了
+                    //                            savePicTask(it,activity,mMediaProjection)
+                    //                        }
+                    savePicTask(it,activity,mMediaProjection)
+                }, null)
 
-                    //把内容投射到ImageReader 的surface
-                    mMediaProjection.createVirtualDisplay(
-                        "image", dm.widthPixels, dm.heightPixels, dm.densityDpi,
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, surface, null, null
-                    )
-                }
+                //把内容投射到ImageReader 的surface
+                mMediaProjection.createVirtualDisplay(
+                    "image", dm.widthPixels, dm.heightPixels, dm.densityDpi,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, surface, null, null
+                )
             }
         }, 400)
     }
@@ -62,7 +68,7 @@ object MediaUtil {
      * 保存图片
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun savePicTask(reader: ImageReader, activity: MainActivity, mMediaProjection: MediaProjection) {
+    private fun savePicTask(reader: ImageReader, activity: Activity, mMediaProjection: MediaProjection) {
         var image: Image? = null
         try {
             //获取捕获的照片数据
@@ -110,12 +116,19 @@ object MediaUtil {
     /**
      * 录屏
      */
-    fun startMedia(activity: MainActivity, mediaProjection: MediaProjection) {
+    @JvmStatic
+    fun startMedia(activity: Activity, mediaProjection: MediaProjection, tag:String) {
         //获取mediaRecorder
         mediaRecorder = MediaRecorderUtil.getMediaRecorder(activity, Constant.SAVE_VIDEO_PATH)
+        var height = 0
+        if (tag=="main"){
+            height=1650
+        }else if (tag=="usb"){
+            height=1500
+        }
         mVirtualDisplay = mediaProjection!!.createVirtualDisplay(
             "你的name",
-            2400, 1650, 1,
+            2400, height, 1,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
             mediaRecorder!!.surface,
             null, null
@@ -132,6 +145,7 @@ object MediaUtil {
     /**
      * 结束录屏
      */
+    @JvmStatic
     fun stopMedia() {
         if (mediaRecorder != null) {
             mediaRecorder?.stop()

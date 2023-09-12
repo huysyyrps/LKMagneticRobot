@@ -46,9 +46,9 @@ android {
         jvmTarget = '1.8'
     }
 
-    buildFeatures{
-        viewBinding true
-    }
+//    buildFeatures{
+//        viewBinding true
+//    }
 
 }
 
@@ -65,7 +65,7 @@ dependencies {
     implementation files("libs/ijkplayer-java-release.aar")
     implementation files('libs/fpvlibrary-v1.4.aar')
     //viewbinding
-    implementation 'com.github.DylanCaiCoding.ViewBindingKTX:viewbinding-base:2.1.0'
+//    implementation 'com.github.DylanCaiCoding.ViewBindingKTX:viewbinding-base:2.1.0'
     //线程切换
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
@@ -84,4 +84,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     //鲁班图片压缩
     implementation 'top.zibin:Luban:1.1.8'
+    //空间声名插件
+    implementation 'com.jakewharton:butterknife:10.1.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
 }

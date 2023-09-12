@@ -17,15 +17,17 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.lkmagneticrobot.R
-import com.example.lkmagneticrobot.YoloV5Ncnn
-import com.example.lkmagneticrobot.constant.BaseBindingActivity
+import com.example.lkmagneticrobot.constant.BaseActivity
 import com.example.lkmagneticrobot.constant.Constant
-import com.example.lkmagneticrobot.databinding.ActivityMainBinding
-import com.example.lkmagneticrobot.util.*
+import com.example.lkmagneticrobot.util.BinaryChange
+import com.example.lkmagneticrobot.util.LogUtil
+import com.example.lkmagneticrobot.util.MainUi
+import com.example.lkmagneticrobot.util.PermissionallBack
 import com.example.lkmagneticrobot.util.dialog.DialogUtil
 import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil
 import com.skydroid.fpvlibrary.serial.SerialPortConnection
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_right.*
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -36,11 +38,11 @@ import kotlin.system.exitProcess
 
 
 //, View.OnClickListener
-class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickListener {
+class MainActivity : BaseActivity(), View.OnClickListener {
     var runing = true
     lateinit var bmp: Bitmap
     private var exitTime: Long = 0
-    private val yolov5ncnn = YoloV5Ncnn()
+//    private val yolov5ncnn = YoloV5Ncnn()
     private lateinit var mediaManager: MediaProjectionManager
     private var mMediaProjection: MediaProjection? = null
     //硬件串口连接实例
@@ -65,12 +67,13 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
         //不息屏
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        if (!yolov5ncnn.Init(assets)) {
-            "yolov5ncnn Init failed".showToast(this)
-            return
-        }
+//        if (!yolov5ncnn.Init(assets)) {
+//            "yolov5ncnn Init failed".showToast(this)
+//            return
+//        }
         //是否通过全部权限
         DialogUtil().requestPermission(this, object : PermissionallBack {
             override fun permissionState(state: Boolean) {
@@ -84,27 +87,27 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
             }
         })
         //设置播放地址
-        binding.fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
+        fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
         //开始播放
-        binding.fpvWidget.start()
+        fpvWidget.start()
         //使用硬解
         fpvWidget?.usingMediaCodec = true
 //        //使用软解
 //        fpvWidget?.usingMediaCodec = false
 
         //点击事件
-        binding.imageView.setOnClickListener(this)
-        binding.fpvWidget.setOnClickListener(this)
-        binding.btnCamer.setOnClickListener(this)
-        binding.btnStartVideo.setOnClickListener(this)
-        binding.btnStopVideo.setOnClickListener(this)
-        binding.btnFile.setOnClickListener(this)
+        imageView.setOnClickListener(this)
+        fpvWidget.setOnClickListener(this)
+        btnCamer.setOnClickListener(this)
+        btnStartVideo.setOnClickListener(this)
+        btnStopVideo.setOnClickListener(this)
+        btnFile.setOnClickListener(this)
 
         initConnect()
 
         //定时读取
         timer.scheduleAtFixedRate(0, 1000*60) {
-            binding.fpvWidget.invalidate()
+            fpvWidget.invalidate()
             LogUtil.e("TAG","1111")
         }
     }
@@ -136,27 +139,27 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.imageView -> {
-                val linearParams = binding.fpvWidget.layoutParams
-                linearParams.height = 200
-                linearParams.width = 300
-                binding.fpvWidget.bringToFront()
-                binding.fpvWidget.layoutParams = linearParams
-                val linearParams1 = binding.imageView.layoutParams
+                val linearParams = fpvWidget.layoutParams
+                linearParams.height = 225
+                linearParams.width = 400
+                fpvWidget.bringToFront()
+                fpvWidget.layoutParams = linearParams
+                val linearParams1 = imageView.layoutParams
                 linearParams1.height = 1200
                 linearParams1.width = 1920 / 3 * 2 - 20
-                binding.imageView.layoutParams = linearParams1
+                imageView.layoutParams = linearParams1
             }
             R.id.fpvWidget -> {
-                val linearParams = binding.imageView.layoutParams
-                linearParams.height = 200
-                linearParams.width = 300
-                binding.imageView.bringToFront()
-                binding.imageView.layoutParams = linearParams
+                val linearParams = imageView.layoutParams
+                linearParams.height = 225
+                linearParams.width = 400
+                imageView.bringToFront()
+                imageView.layoutParams = linearParams
 
-                val linearParams1 = binding.fpvWidget.layoutParams
+                val linearParams1 = fpvWidget.layoutParams
                 linearParams1.height = 1200
                 linearParams1.width = 1920 / 3 * 2 - 20
-                binding.fpvWidget.layoutParams = linearParams1
+                fpvWidget.layoutParams = linearParams1
             }
             R.id.btnCamer -> {
                 mediaManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
@@ -165,7 +168,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                     startActivityForResult(captureIntent, Constant.TAG_ONE)
                 } else {
                     mMediaProjection?.let {
-                        MediaUtil.captureImages(this@MainActivity, it)
+                        MediaUtil.captureImages(this@MainActivity, it,"main")
                     }
                 }
             }
@@ -176,20 +179,20 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                     startActivityForResult(captureIntent, Constant.TAG_TWO)
                 } else {
                     mMediaProjection?.let {
-                        MediaUtil.startMedia(this@MainActivity, it)
-                        binding.btnStartVideo.visibility = View.GONE
-                        binding.btnStopVideo.visibility = View.VISIBLE
+                        MediaUtil.startMedia(this@MainActivity, it,"main")
+                        btnStartVideo.visibility = View.GONE
+                        btnStopVideo.visibility = View.VISIBLE
                     }
                 }
             }
             R.id.btnStopVideo -> {
                 MediaUtil.stopMedia()
-                binding.btnStartVideo.visibility = View.VISIBLE
-                binding.btnStopVideo.visibility = View.GONE
+                btnStartVideo.visibility = View.VISIBLE
+                btnStopVideo.visibility = View.GONE
             }
             R.id.btnFile -> {
-//                MainUi.showPopupMenu(binding.btnFile, "Desc", this)
-                startActivity(Intent(this,UsbSerialActivity::class.java))
+                MainUi.showPopupMenu(btnFile, "Desc", this)
+//                startActivity(Intent(this,UsbSerialActivity::class.java))
             }
         }
     }
@@ -216,7 +219,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
 //            CoroutineScope(Dispatchers.Main).launch {
 //                objects = yolov5ncnn.Detect(bmp, false)
 //                if (objects == null || objects.isEmpty()) {
-//                    binding.imageView.setImageBitmap(bmp)
+//                    imageView.setImageBitmap(bmp)
 //                } else {
 //                    val rgba = bmp.copy(Bitmap.Config.ARGB_8888, true)
 //                    val canvas = Canvas(rgba)
@@ -237,11 +240,11 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
 //                            BasePaint.getTextpaint()
 //                        )
 //                    }
-//                    binding.imageView.setImageBitmap(rgba)
+//                    imageView.setImageBitmap(rgba)
 //                }
 //            }
 
-            binding.imageView.setImageBitmap(bmp)
+            imageView.setImageBitmap(bmp)
             //关闭HttpURLConnection连接
             conn.disconnect()
         } catch (ex: Exception) {
@@ -258,13 +261,13 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
             when (requestCode) {
                 Constant.TAG_ONE -> {
                     mMediaProjection = data?.let { mediaManager.getMediaProjection(resultCode, it) }
-                    mMediaProjection?.let { MediaUtil.captureImages(this, it) }
+                    mMediaProjection?.let { MediaUtil.captureImages(this, it,"main") }
                 }
                 Constant.TAG_TWO -> {
                     mMediaProjection = data?.let { mediaManager.getMediaProjection(resultCode, it) }
-                    mMediaProjection?.let { MediaUtil.startMedia(this, it) }
-                    binding.btnStartVideo.visibility = View.GONE
-                    binding.btnStopVideo.visibility = View.VISIBLE
+                    mMediaProjection?.let { MediaUtil.startMedia(this, it,"main") }
+                    btnStartVideo.visibility = View.GONE
+                    btnStopVideo.visibility = View.VISIBLE
                 }
             }
         }
@@ -272,7 +275,7 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.fpvWidget.stop()
+        fpvWidget.stop()
         if (mServiceConnection != null) {
             try {
                 mServiceConnection!!.closeConnection()

@@ -1,272 +1,202 @@
 package com.example.lkmagneticrobot.activity;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.usb.UsbDevice;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lkmagneticrobot.R;
-import com.skydroid.android.usbserial.DeviceFilter;
-import com.skydroid.android.usbserial.USBMonitor;
-import com.skydroid.fpvlibrary.enums.PTZAction;
-import com.skydroid.fpvlibrary.usbserial.UsbSerialConnection;
-import com.skydroid.fpvlibrary.usbserial.UsbSerialControl;
-import com.skydroid.fpvlibrary.utils.BusinessUtils;
-import com.skydroid.fpvlibrary.video.FPVVideoClient;
+import com.example.lkmagneticrobot.constant.Constant;
+import com.example.lkmagneticrobot.util.MainUi;
+import com.example.lkmagneticrobot.util.PermissionallBack;
+import com.example.lkmagneticrobot.util.dialog.DialogUtil;
+import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil;
+import com.example.lkmagneticrobot.util.usb.UsbSerialInit;
+import com.example.lkmagneticrobot.view.BaseButton;
 import com.skydroid.fpvlibrary.widget.GLHttpVideoSurface;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import kotlinx.coroutines.Dispatchers;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * usb串口连接方式
  */
 public class UsbSerialActivity extends AppCompatActivity {
-    private Context mContext;
-
-    //Usb监视器
-    private USBMonitor mUSBMonitor;
-
-    //Usb设备
-    private UsbDevice mUsbDevice;
-
+    @BindView(R.id.fPVVideoView)
+    GLHttpVideoSurface fPVVideoView;
+    @BindView(R.id.imageView)
+    ImageView imageView;
+    @BindView(R.id.frameLayout)
+    FrameLayout frameLayout;
+    @BindView(R.id.btnCamer)
+    BaseButton btnCamer;
+    @BindView(R.id.btnStartVideo)
+    BaseButton btnStartVideo;
+    @BindView(R.id.btnStopVideo)
+    BaseButton btnStopVideo;
+    @BindView(R.id.btnFile)
+    BaseButton btnFile;
     private GLHttpVideoSurface mPreviewDualVideoView;
+    private MediaProjectionManager mediaManager;
+    private MediaProjection mMediaProjection;
+    Boolean runing = true;
 
-    //视频渲染
-    private FPVVideoClient mFPVVideoClient;
-
-    //usb连接实例
-    private UsbSerialConnection mUsbSerialConnection;
-
-    //摄像头控制
-    private UsbSerialControl mUsbSerialControl;
-
-    private Handler mainHanlder = new Handler(Looper.getMainLooper());
-
+    @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_usbserial);
-        this.mContext = this;
+        ButterKnife.bind(this);
         initView();
-        init();
+        //是否通过全部权限
+        new DialogUtil().requestPermission(this, new PermissionallBack() {
+            @Override
+            public void permissionState(boolean state) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (runing) {
+                            getVideoPhoto();
+                        }
+                    }
+                }).start();
+            }
+        });
     }
 
-    private void initView(){
+    private void initView() {
         mPreviewDualVideoView = findViewById(R.id.fPVVideoView);
         mPreviewDualVideoView.init();
+        new UsbSerialInit().init(this, mPreviewDualVideoView);
     }
 
-    private void init(){
-        //初始化usb连接
-        mUsbSerialConnection = new UsbSerialConnection(mContext);
-        mUsbSerialConnection.setDelegate(new UsbSerialConnection.Delegate() {
-            @Override
-            public void onH264Received(byte[] bytes, int paySize) {
-                //视频数据
-                if(mFPVVideoClient != null){
-                    mFPVVideoClient.received(bytes,4,paySize);
-                }
-            }
-
-            @Override
-            public void onGPSReceived(byte[] bytes) {
-                //GPS数据
-            }
-
-            @Override
-            public void onDataReceived(byte[] bytes) {
-                //数传数据
-            }
-
-            @Override
-            public void onDebugReceived(byte[] bytes) {
-                //遥控器数据
-            }
-        });
-
-        //渲染视频相关
-        mFPVVideoClient = new FPVVideoClient();
-        mFPVVideoClient.setDelegate(new FPVVideoClient.Delegate() {
-            @Override
-            public void onStopRecordListener(String fileName) {
-                //停止录像回调
-            }
-
-            @Override
-            public void onSnapshotListener(String fileName) {
-                //拍照回调
-            }
-
-            //视频相关
-            @Override
-            public void renderI420(byte[] frame, int width, int height) {
-                mPreviewDualVideoView.renderI420(frame,width,height);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(mContext, "4", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void setVideoSize(int picWidth, int picHeight) {
-                mPreviewDualVideoView.setVideoSize(picWidth,picHeight,mainHanlder);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(mContext, "5", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void resetView() {
-                mPreviewDualVideoView.resetView(mainHanlder);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(mContext, "6", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-
-        //FPV控制
-        mUsbSerialControl = new UsbSerialControl(mUsbSerialConnection);
-        mUSBMonitor = new USBMonitor(mContext,mOnDeviceConnectListener);
-        List<DeviceFilter> deviceFilters = DeviceFilter.getDeviceFilters(mContext, R.xml.device_filter);
-        mUSBMonitor.setDeviceFilter(deviceFilters);
-        mUSBMonitor.register();
-    }
-
-    //使用 USBMonitor 处理USB连接回调
-    private USBMonitor.OnDeviceConnectListener mOnDeviceConnectListener = new USBMonitor.OnDeviceConnectListener() {
-        // USB device attach
-        // USB设备插入
-        @Override
-        public void onAttach(final UsbDevice device) {
-            if(deviceHasConnected(device) || mUsbDevice != null){
-                return;
-            }
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if(device == null){
-                            List<UsbDevice> devices = mUSBMonitor.getDeviceList();
-                            if(devices.size() == 1){
-                                mUSBMonitor.requestPermission(devices.get(0));
-                                Toast.makeText(mContext, "1", Toast.LENGTH_SHORT).show();
-                            }
-                        }else {
-                            mUSBMonitor.requestPermission(device);
-                        }
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            });
+    private void getVideoPhoto() {
+        try {
+            InputStream inputstream = null;
+            //创建一个URL对象
+            URL videoUrl = new URL(Constant.URL+"?action=snapshot");
+            //利用HttpURLConnection对象从网络中获取网页数据
+            HttpURLConnection conn = (HttpURLConnection) videoUrl.openConnection();
+            //设置输入流
+            //设置输入流
+            conn.setDoInput(true);
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(3000);
+            //连接
+            conn.connect();
+            //得到网络返回的输入流
+            inputstream = conn.getInputStream();
+            //创建出一个bitmap
+            Bitmap bmp = BitmapFactory.decodeStream(inputstream);
+            imageView.setImageBitmap(bmp);
+            //关闭HttpURLConnection连接
+            conn.disconnect();
+        }  catch (Exception ex) {
+            ex.printStackTrace();
+        }  finally {
         }
-
-        // USB device detach
-        // USB设备物理断开
-        @Override
-        public void onDettach(UsbDevice device) {
-            if (!BusinessUtils.deviceIsUartVideoDevice(device)) {
-                return;
-            }
-            if (!deviceHasConnected(device)) {
-                return;
-            }
-            disconnected();
-        }
-
-        // USB device has obtained permission
-        // USB设备获得权限
-        @Override
-        public void onConnect(UsbDevice device, USBMonitor.UsbControlBlock var2, boolean var3) {
-            if (!BusinessUtils.deviceIsUartVideoDevice(device)) {
-                return;
-            }
-            if (deviceHasConnected(device)) {
-                return;
-            }
-            synchronized (this){
-                if (BusinessUtils.deviceIsUartVideoDevice(device)) {
-                    try {
-                        //打开串口
-                        mUsbSerialConnection.openConnection(device);
-                        mUsbDevice = device;
-                        //开始渲染视频
-                        mFPVVideoClient.startPlayback();
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        // USB device disconnected
-        // USB设备关闭连接
-        @Override
-        public void onDisconnect(UsbDevice device, USBMonitor.UsbControlBlock var2) {
-            if (!BusinessUtils.deviceIsUartVideoDevice(device)) {
-                return;
-            }
-            if (!deviceHasConnected(device)) {
-                return;
-            }
-            disconnected();
-            Toast.makeText(mContext, "3", Toast.LENGTH_SHORT).show();
-        }
-
-        // USB device obtained permission failed
-        // USB设备权限获取失败
-        @Override
-        public void onCancel() {
-
-        }
-    };
-
-    //关闭连接
-    private void disconnected(){
-        if(mUsbSerialConnection != null){
-            try {
-                mUsbSerialConnection.closeConnection();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        if(mFPVVideoClient != null){
-            mFPVVideoClient.stopPlayback();
-        }
-
-        mUsbDevice = null;
-    }
-
-    private boolean deviceHasConnected(UsbDevice usbDevice){
-        return usbDevice != null && usbDevice == mUsbDevice;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        disconnected();
-        if(mUSBMonitor != null){
-            mUSBMonitor.unregister();
-            mUSBMonitor.destroy();
-            mUSBMonitor = null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @OnClick({R.id.fPVVideoView, R.id.imageView, R.id.btnCamer, R.id.btnStartVideo, R.id.btnStopVideo, R.id.btnFile})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.fPVVideoView:
+                ViewGroup.LayoutParams linearParams = imageView.getLayoutParams();
+                linearParams.height = 225;
+                linearParams.width = 400;
+                imageView.bringToFront();
+                imageView.setLayoutParams(linearParams);
+
+                ViewGroup.LayoutParams linearParams1 = fPVVideoView.getLayoutParams();
+                linearParams1.height = 1200;
+                linearParams1.width = 1920 / 3 * 2 - 20;
+                fPVVideoView.setLayoutParams(linearParams1);
+                break;
+            case R.id.imageView:
+                ViewGroup.LayoutParams linearParams2 = fPVVideoView.getLayoutParams();
+                linearParams2.height = 225;
+                linearParams2.width = 400;
+                fPVVideoView.bringToFront();
+                fPVVideoView.setLayoutParams(linearParams2);
+                ViewGroup.LayoutParams linearParams3 = imageView.getLayoutParams();
+                linearParams3.height = 1200;
+                linearParams3.width = 1920 / 3 * 2 - 20;
+                imageView.setLayoutParams(linearParams3);
+                break;
+            case R.id.btnCamer:
+                mediaManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                if (mMediaProjection == null) {
+                    Intent captureIntent = mediaManager.createScreenCaptureIntent();
+                    startActivityForResult(captureIntent, Constant.TAG_ONE);
+                } else {
+                    MediaUtil.captureImages(this, mMediaProjection,"usb");
+                }
+                break;
+            case R.id.btnStartVideo:
+                mediaManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                if (mMediaProjection == null) {
+                    Intent captureIntent = mediaManager.createScreenCaptureIntent();
+                    startActivityForResult(captureIntent, Constant.TAG_TWO);
+                } else {
+                    MediaUtil.startMedia(this ,mMediaProjection,"usb");
+                    btnStartVideo.setVisibility(View.GONE);
+                    btnStopVideo.setVisibility(View.VISIBLE);
+                }
+                break;
+            case R.id.btnStopVideo:
+                MediaUtil.stopMedia();
+                btnStartVideo.setVisibility(View.VISIBLE);
+                btnStopVideo.setVisibility(View.GONE);
+                break;
+            case R.id.btnFile:
+                MainUi.showPopupMenu(btnFile, "Desc", this);
+                break;
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode==Constant.TAG_ONE){
+                mMediaProjection =  mediaManager.getMediaProjection(resultCode, data) ;
+                MediaUtil.captureImages(this, mMediaProjection,"usb");
+            }
+            if (requestCode==Constant.TAG_TWO){
+                mMediaProjection =  mediaManager.getMediaProjection(resultCode, data) ;
+                MediaUtil.startMedia(this, mMediaProjection,"usb");
+                btnStartVideo.setVisibility(View.GONE);
+                btnStopVideo.setVisibility(View.VISIBLE);
+            }
         }
     }
 }

@@ -13,27 +13,26 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.example.lkmagneticrobot.R
 import com.example.lkmagneticrobot.adapter.ImageListAdapter
-import com.example.lkmagneticrobot.constant.BaseBindingActivity
+import com.example.lkmagneticrobot.constant.BaseActivity
 import com.example.lkmagneticrobot.constant.Constant
-import com.example.lkmagneticrobot.databinding.ActivityVideoListBinding
 import com.example.lkmagneticrobot.util.AdapterPositionCallBack
 import com.example.lkmagneticrobot.util.FileGet
 import com.example.lkmagneticrobot.util.LogUtil
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
+import kotlinx.android.synthetic.main.activity_video_list.*
 import kotlinx.android.synthetic.main.dialog_remove.*
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.concurrent.scheduleAtFixedRate
 
-class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
+class VideoListActivity : BaseActivity() {
     var selectIndex = 0
     private var longTime:Long? = 0
     private var longTimeCurrent:Long? = 0
     var timer:Timer? = null
     private lateinit var dialog: MaterialDialog
-    lateinit var fileList : MutableList<File>
+    var fileList : MutableList<File> = mutableListOf()
     private lateinit var adapter: ImageListAdapter
 
     companion object{
@@ -44,15 +43,16 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_video_list)
         val layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.layoutManager = layoutManager
-        binding.smartRefreshLayout.setRefreshHeader(ClassicsHeader(this))
-        binding.smartRefreshLayout.setRefreshFooter(ClassicsFooter(this)) //是否启用下拉刷新功能
-        binding.smartRefreshLayout.setOnRefreshListener {
+        recyclerView.layoutManager = layoutManager
+        smartRefreshLayout.setRefreshHeader(ClassicsHeader(this))
+        smartRefreshLayout.setRefreshFooter(ClassicsFooter(this)) //是否启用下拉刷新功能
+        smartRefreshLayout.setOnRefreshListener {
             getFileList()
         }
 
-        binding.imageView.setOnLongClickListener {
+        imageView.setOnLongClickListener {
             dialog = MaterialDialog(this).show {
                 customView(    //自定义弹窗
                     viewRes = R.layout.dialog_remove,//自定义文件
@@ -72,8 +72,8 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
                         val file = fileList[selectIndex]
                         file.delete()
                         fileList.removeAt(selectIndex)
-                        binding.linNoData.visibility = View.VISIBLE
-                        binding.linData.visibility = View.GONE
+                        linNoData.visibility = View.VISIBLE
+                        linData.visibility = View.GONE
                     } else {
                         val file = fileList[selectIndex]
                         file.delete()
@@ -106,26 +106,26 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
             true
         }
 
-        binding.ivImagelistBack.setOnClickListener { finish() }
-        binding.ivStart.setOnClickListener {
-            binding.imageView.visibility = View.GONE
-            binding.videoView.visibility = View.VISIBLE
-            binding.videoView.start()
+        ivImagelistBack.setOnClickListener { finish() }
+        ivStart.setOnClickListener {
+            imageView.visibility = View.GONE
+            videoView.visibility = View.VISIBLE
+            videoView.start()
             longTimeCurrent = longTime
             timer = Timer()
             timer?.scheduleAtFixedRate(1000, 1000) {
                 longTimeCurrent = longTimeCurrent?.minus(1000)
-                binding.tvTime.text = longTimeCurrent?.let { timeParse(it) }
+                tvTime.text = longTimeCurrent?.let { timeParse(it) }
             }
         }
-        binding.videoView.setOnPreparedListener(MediaPlayer.OnPreparedListener { binding.videoView.start() })
-        binding.videoView.setOnCompletionListener(MediaPlayer.OnCompletionListener {
-            binding.videoView.visibility = View.GONE
-            binding.imageView.visibility = View.VISIBLE
-            binding.tvTime.text = longTime?.let { timeParse(it) }
+        videoView.setOnPreparedListener(MediaPlayer.OnPreparedListener { videoView.start() })
+        videoView.setOnCompletionListener(MediaPlayer.OnCompletionListener {
+            videoView.visibility = View.GONE
+            imageView.visibility = View.VISIBLE
+            tvTime.text = longTime?.let { timeParse(it) }
             timer?.cancel()
         })
-        binding.videoView.setOnErrorListener(MediaPlayer.OnErrorListener { mp, what, extra ->
+        videoView.setOnErrorListener(MediaPlayer.OnErrorListener { mp, what, extra ->
             LogUtil.e("TAG","2222")
             true
         })
@@ -136,13 +136,17 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
     //获取数据列表
     private fun getFileList() {
         /**将文件夹下所有文件名存入数组*/
-        fileList = FileGet.listFileSortByModifyTime(this.externalCacheDir.toString() + "/" + Constant.SAVE_VIDEO_PATH + "/").reversed() as MutableList<File>
+        var backList = FileGet.listFileSortByModifyTime(this.externalCacheDir.toString() + "/" + Constant.SAVE_VIDEO_PATH + "/").reversed()
+        if (!backList.isNullOrEmpty()){
+            fileList = backList.toMutableList()
+        }
+//        fileList = FileGet.listFileSortByModifyTime(this.externalCacheDir.toString() + "/" + Constant.SAVE_VIDEO_PATH + "/").reversed() as MutableList<File>
         if (fileList.isNullOrEmpty()) {
-            binding.linNoData.visibility = View.VISIBLE
-            binding.linData.visibility = View.GONE
+            linNoData.visibility = View.VISIBLE
+            linData.visibility = View.GONE
         } else {
-            binding.linNoData.visibility = View.GONE
-            binding.linData.visibility = View.VISIBLE
+            linNoData.visibility = View.GONE
+            linData.visibility = View.VISIBLE
             adapter = ImageListAdapter(
                 fileList,
                 selectIndex,
@@ -151,26 +155,26 @@ class VideoListActivity : BaseBindingActivity<ActivityVideoListBinding>() {
                     override fun backPosition(index: Int) {
                         selectIndex = index
                         timer?.cancel()
-                        binding.videoView.visibility = View.GONE
-                        binding.imageView.visibility = View.VISIBLE
+                        videoView.visibility = View.GONE
+                        imageView.visibility = View.VISIBLE
                         setVideo(fileList[selectIndex])
                     }
                 })
-            binding.recyclerView.adapter = adapter
+            recyclerView.adapter = adapter
             setVideo(fileList[selectIndex])
             adapter.notifyDataSetChanged()
-            binding.smartRefreshLayout?.finishLoadMore()
-            binding.smartRefreshLayout?.finishRefresh()
+            smartRefreshLayout?.finishLoadMore()
+            smartRefreshLayout?.finishRefresh()
         }
     }
 
     private fun setVideo(file: File) {
-        binding.imageView.setImageBitmap(getRingBitmap(file))
-        binding.videoView.setVideoPath(file.path)
-        binding.tvFileName.text = file.name
+        imageView.setImageBitmap(getRingBitmap(file))
+        videoView.setVideoPath(file.path)
+        tvFileName.text = file.name
         longTime = getRingDuring(file)
         longTimeCurrent = longTime
-        binding.tvTime.text = longTime?.let { timeParse(it) }
+        tvTime.text = longTime?.let { timeParse(it) }
     }
 
     /**

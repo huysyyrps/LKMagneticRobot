@@ -5,19 +5,15 @@ import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewbinding.ViewBinding
-import com.dylanc.viewbinding.base.ActivityBinding
-import com.dylanc.viewbinding.base.ActivityBindingDelegate
 import com.example.lkmagneticrobot.util.ActivityCollector
 
 
-abstract class BaseBindingActivity<VB : ViewBinding> : AppCompatActivity(), ActivityBinding<VB> by ActivityBindingDelegate() {
+abstract class BaseActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("BaseActivity", javaClass.simpleName)
         hideStatusBar()
         ActivityCollector.addActivity(this)
-        setContentViewWithBinding()
 
     }
 

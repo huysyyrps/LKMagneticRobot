@@ -12,21 +12,21 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.example.lkmagneticrobot.R
 import com.example.lkmagneticrobot.adapter.ImageListAdapter
-import com.example.lkmagneticrobot.constant.BaseBindingActivity
+import com.example.lkmagneticrobot.constant.BaseActivity
 import com.example.lkmagneticrobot.constant.Constant
-import com.example.lkmagneticrobot.databinding.ActivityImageListBinding
 import com.example.lkmagneticrobot.util.AdapterPositionCallBack
 import com.example.lkmagneticrobot.util.FileGet.listFileSortByModifyTime
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
+import kotlinx.android.synthetic.main.activity_image_list.*
 import kotlinx.android.synthetic.main.dialog_remove.*
 import top.zibin.luban.Luban
 import top.zibin.luban.OnCompressListener
 import java.io.File
 
-class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
+class ImageListActivity : BaseActivity() {
     var selectIndex = 0
-    lateinit var fileList : MutableList<File>
+     var fileList : MutableList<File> = mutableListOf()
     private lateinit var dialog: MaterialDialog
     private lateinit var adapter: ImageListAdapter
 
@@ -38,15 +38,16 @@ class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_image_list)
         val layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.layoutManager = layoutManager
-        binding.smartRefreshLayout.setRefreshHeader(ClassicsHeader(this))
-        binding.smartRefreshLayout.setRefreshFooter(ClassicsFooter(this)) //是否启用下拉刷新功能
-        binding.smartRefreshLayout.setOnRefreshListener {
+        recyclerView.layoutManager = layoutManager
+        smartRefreshLayout.setRefreshHeader(ClassicsHeader(this))
+        smartRefreshLayout.setRefreshFooter(ClassicsFooter(this)) //是否启用下拉刷新功能
+        smartRefreshLayout.setOnRefreshListener {
             getFileList()
         }
 
-        binding.imageView.setOnLongClickListener {
+        imageView.setOnLongClickListener {
             dialog = MaterialDialog(this).show {
                 customView(    //自定义弹窗
                     viewRes = R.layout.dialog_remove,//自定义文件
@@ -66,8 +67,8 @@ class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
                         val file = fileList[selectIndex]
                         file.delete()
                         fileList.removeAt(selectIndex)
-                        binding.linNoData.visibility = View.VISIBLE
-                        binding.linData.visibility = View.GONE
+                        linNoData.visibility = View.VISIBLE
+                        linData.visibility = View.GONE
                     } else {
                         val file = fileList[selectIndex]
                         file.delete()
@@ -100,7 +101,7 @@ class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
             true
         }
 
-        binding.ivImagelistBack.setOnClickListener { finish() }
+        ivImagelistBack.setOnClickListener { finish() }
         getFileList()
     }
 
@@ -108,13 +109,16 @@ class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
     @SuppressLint("NotifyDataSetChanged")
     private fun getFileList() {
         /**将文件夹下所有文件名存入数组*/
-        fileList = listFileSortByModifyTime(this.externalCacheDir.toString()+ "/" + Constant.SAVE_IMAGE_PATH + "/").reversed() as MutableList<File>
+        var backList = listFileSortByModifyTime(this.externalCacheDir.toString()+ "/" + Constant.SAVE_IMAGE_PATH + "/").reversed()
+        if (!backList.isNullOrEmpty()){
+            fileList = backList.toMutableList()
+        }
         if (fileList.isNullOrEmpty()) {
-            binding.linNoData.visibility = View.VISIBLE
-            binding.linData.visibility = View.GONE
+            linNoData.visibility = View.VISIBLE
+            linData.visibility = View.GONE
         } else {
-            binding.linNoData.visibility = View.GONE
-            binding.linData.visibility = View.VISIBLE
+            linNoData.visibility = View.GONE
+            linData.visibility = View.VISIBLE
             adapter = ImageListAdapter(
                 fileList,
                 selectIndex,
@@ -126,12 +130,12 @@ class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
                         setBitmap(fileList[selectIndex])
                     }
                 })
-            binding.recyclerView.adapter = adapter
+            recyclerView.adapter = adapter
 //            var path = fileList[selectIndex].path
             setBitmap(fileList[selectIndex])
             adapter.notifyDataSetChanged()
-            binding.smartRefreshLayout.finishLoadMore()
-            binding.smartRefreshLayout.finishRefresh()
+            smartRefreshLayout.finishLoadMore()
+            smartRefreshLayout.finishRefresh()
         }
     }
 
@@ -149,8 +153,8 @@ class ImageListActivity : BaseBindingActivity<ActivityImageListBinding>() {
 
                 override fun onSuccess(file: File) {
                     val bitmap = BitmapFactory.decodeFile(file.path)
-                    binding.imageView.setImageBitmap(bitmap)
-//                    binding.tvFileName.text = file.name
+                    imageView.setImageBitmap(bitmap)
+//                    tvFileName.text = file.name
                 }
 
                 override fun onError(e: Throwable) {

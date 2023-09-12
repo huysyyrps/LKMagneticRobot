@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.example.lkmagneticrobot.activity.MainActivity
 import com.example.lkmagneticrobot.util.PermissionallBack
@@ -19,7 +20,7 @@ class DialogUtil {
     权限申请
      */
     @RequiresApi(Build.VERSION_CODES.S)
-    fun requestPermission(activity: MainActivity, callBacl: PermissionallBack): Boolean {
+    fun requestPermission(activity: AppCompatActivity, callBacl: PermissionallBack): Boolean {
 
         var permissionTag = false
         val requestList = ArrayList<String>()
