@@ -19,6 +19,9 @@
             android:theme="@style/NoAction"
             android:usesCleartextTraffic="true">
         <activity
+                android:name=".activity.UsbSerialActivity"
+                android:exported="false" />
+        <activity
                 android:name=".activity.VideoListActivity"
                 android:exported="false" />
         <activity

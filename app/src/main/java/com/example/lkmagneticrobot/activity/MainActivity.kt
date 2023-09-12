@@ -188,7 +188,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>(), View.OnClickLis
                 binding.btnStopVideo.visibility = View.GONE
             }
             R.id.btnFile -> {
-                MainUi.showPopupMenu(binding.btnFile, "Desc", this)
+//                MainUi.showPopupMenu(binding.btnFile, "Desc", this)
+                startActivity(Intent(this,UsbSerialActivity::class.java))
             }
         }
     }
