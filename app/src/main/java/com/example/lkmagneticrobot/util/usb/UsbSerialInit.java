@@ -1,20 +1,18 @@
 package com.example.lkmagneticrobot.util.usb;
 
 import android.app.Activity;
-import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Toast;
 
 import com.example.lkmagneticrobot.R;
+import com.example.lkmagneticrobot.util.usbfpv.FPVVideoClient;
+import com.example.lkmagneticrobot.util.usbfpv.GLHttpVideoSurface;
 import com.skydroid.android.usbserial.DeviceFilter;
 import com.skydroid.android.usbserial.USBMonitor;
 import com.skydroid.fpvlibrary.usbserial.UsbSerialConnection;
 import com.skydroid.fpvlibrary.usbserial.UsbSerialControl;
 import com.skydroid.fpvlibrary.utils.BusinessUtils;
-import com.skydroid.fpvlibrary.video.FPVVideoClient;
-import com.skydroid.fpvlibrary.widget.GLHttpVideoSurface;
 
 import java.util.List;
 
@@ -79,12 +77,14 @@ public class UsbSerialInit {
             //视频相关
             @Override
             public void renderI420(byte[] frame, int width, int height) {
+//                UsbSerialInit.this.mPreviewDualVideoView.renderI420(frame, 1080,1080);
                 UsbSerialInit.this.mPreviewDualVideoView.renderI420(frame,width,height);
             }
 
             @Override
             public void setVideoSize(int picWidth, int picHeight) {
                 UsbSerialInit.this.mPreviewDualVideoView.setVideoSize(picWidth,picHeight,mainHanlder);
+//                UsbSerialInit.this.mPreviewDualVideoView.setVideoSize(1080,1080,mainHanlder);
             }
 
             @Override
@@ -189,7 +189,7 @@ public class UsbSerialInit {
     };
 
     //关闭连接
-    private void disconnected(){
+    public void disconnected(){
         if(mUsbSerialConnection != null){
             try {
                 mUsbSerialConnection.closeConnection();
@@ -209,7 +209,7 @@ public class UsbSerialInit {
         }
     }
 
-    private boolean deviceHasConnected(UsbDevice usbDevice){
+    public boolean deviceHasConnected(UsbDevice usbDevice){
         return usbDevice != null && usbDevice == mUsbDevice;
     }
 }

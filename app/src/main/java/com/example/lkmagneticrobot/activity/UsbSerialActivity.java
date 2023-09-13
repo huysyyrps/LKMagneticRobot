@@ -1,6 +1,5 @@
 package com.example.lkmagneticrobot.activity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +9,8 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -27,13 +27,11 @@ import com.example.lkmagneticrobot.util.PermissionallBack;
 import com.example.lkmagneticrobot.util.dialog.DialogUtil;
 import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil;
 import com.example.lkmagneticrobot.util.usb.UsbSerialInit;
+import com.example.lkmagneticrobot.util.usbfpv.GLHttpVideoSurface;
 import com.example.lkmagneticrobot.view.BaseButton;
-import com.skydroid.fpvlibrary.widget.GLHttpVideoSurface;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import butterknife.BindView;
@@ -58,7 +56,7 @@ public class UsbSerialActivity extends AppCompatActivity {
     BaseButton btnStopVideo;
     @BindView(R.id.btnFile)
     BaseButton btnFile;
-    private GLHttpVideoSurface mPreviewDualVideoView;
+//    private GLHttpVideoSurface mPreviewDualVideoView;
     private MediaProjectionManager mediaManager;
     private MediaProjection mMediaProjection;
     Boolean runing = true;
@@ -87,9 +85,9 @@ public class UsbSerialActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        mPreviewDualVideoView = findViewById(R.id.fPVVideoView);
-        mPreviewDualVideoView.init();
-        new UsbSerialInit().init(this, mPreviewDualVideoView);
+//        mPreviewDualVideoView = findViewById(R.id.fPVVideoView);
+        fPVVideoView.init();
+        new UsbSerialInit().init(this, fPVVideoView);
     }
 
     private void getVideoPhoto() {
@@ -130,26 +128,31 @@ public class UsbSerialActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.fPVVideoView:
                 ViewGroup.LayoutParams linearParams = imageView.getLayoutParams();
-                linearParams.height = 225;
-                linearParams.width = 400;
+                linearParams.height = 280;
+                linearParams.width = 308;
                 imageView.bringToFront();
                 imageView.setLayoutParams(linearParams);
 
                 ViewGroup.LayoutParams linearParams1 = fPVVideoView.getLayoutParams();
-                linearParams1.height = 1200;
-                linearParams1.width = 1920 / 3 * 2 - 20;
+                linearParams1.height = 1150;
+                linearParams1.width = 1265;
                 fPVVideoView.setLayoutParams(linearParams1);
+                //.onSurfaceDestroyed();
+                fPVVideoView.getRenderer().onSurfaceDestroyed();
                 break;
             case R.id.imageView:
                 ViewGroup.LayoutParams linearParams2 = fPVVideoView.getLayoutParams();
-                linearParams2.height = 225;
-                linearParams2.width = 400;
+                linearParams2.height = 280;
+                linearParams2.width = 308;
                 fPVVideoView.bringToFront();
+                new UsbSerialInit().disconnected();
                 fPVVideoView.setLayoutParams(linearParams2);
+
                 ViewGroup.LayoutParams linearParams3 = imageView.getLayoutParams();
-                linearParams3.height = 1200;
-                linearParams3.width = 1920 / 3 * 2 - 20;
+                linearParams3.height = 1150;
+                linearParams3.width = 1265;
                 imageView.setLayoutParams(linearParams3);
+
                 break;
             case R.id.btnCamer:
                 mediaManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
