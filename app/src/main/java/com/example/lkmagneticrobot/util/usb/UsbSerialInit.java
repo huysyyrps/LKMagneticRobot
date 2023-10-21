@@ -99,6 +99,7 @@ public class UsbSerialInit {
         List<DeviceFilter> deviceFilters = DeviceFilter.getDeviceFilters(mContext, R.xml.device_filter);
         mUSBMonitor.setDeviceFilter(deviceFilters);
         mUSBMonitor.register();
+
     }
 
     //使用 USBMonitor 处理USB连接回调

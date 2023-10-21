@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:baselineAligned="false">
     <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:ignore="UselessParent">
 
         <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.7"
+                android:layout_weight="1.3"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 app:cardCornerRadius="10dp">
@@ -25,10 +28,9 @@
 
                 <com.example.lkmagneticrobot.view.BaseTitle
                         android:layout_width="match_parent"
-                        android:layout_height="25dp"
+                        android:layout_height="35dp"
                         app:text_header_is_left_iv_visiable="true"
                         app:text_header_title="@string/work_data" />
-
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -46,6 +48,7 @@
                                 android:text="@string/work_current" />
 
                         <EditText
+                                android:id="@+id/etWorkCurrent"
                                 style="@style/EditText"
                                 android:enabled="false"
                                 android:inputType="number" />
@@ -59,9 +62,10 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/work_voltage" />
+                                android:text="@string/run_distance" />
 
                         <EditText
+                                android:id="@+id/etDistance"
                                 style="@style/EditText"
                                 android:enabled="false"
                                 android:inputType="number" />
@@ -75,14 +79,76 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/travel_distance" />
+                                android:text="@string/run_speed" />
 
                         <EditText
+                                android:id="@+id/etSpeed"
                                 style="@style/EditText"
                                 android:enabled="false"
                                 android:inputType="number" />
                     </LinearLayout>
                 </LinearLayout>
+
+                <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:layout_marginTop="5dp"
+                            android:orientation="horizontal">
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <TextView
+                                    style="@style/TextName"
+                                    android:text="@string/run_type" />
+
+                            <EditText
+                                    android:id="@+id/etRunType"
+                                    style="@style/EditText"
+                                    android:enabled="false"
+                                    android:inputType="number" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <TextView
+                                    style="@style/TextName"
+                                    android:text="@string/frequency" />
+
+                            <EditText
+                                    android:id="@+id/etFrequency"
+                                    style="@style/EditText"
+                                    android:enabled="false"
+                                    android:inputType="number" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <TextView
+                                    style="@style/TextName"
+                                    android:text="@string/battery_level" />
+
+                            <com.example.lkmagneticrobot.view.BatteryView
+                                    android:id="@+id/batteryView"
+                                    android:layout_width="70dp"
+                                    android:layout_height="25dp"
+                                    android:layout_marginTop="2dp"
+                                    android:layout_marginLeft="15dp"
+                                    android:layout_gravity="left"/>
+                        </LinearLayout>
+                    </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -98,12 +164,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
-
-                <com.example.lkmagneticrobot.view.BaseTitle
+                <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="25dp"
-                        app:text_header_is_left_iv_visiable="true"
-                        app:text_header_title="@string/show_control" />
+                        android:layout_height="35dp">
+                    <com.example.lkmagneticrobot.view.BaseTitle
+                            android:layout_width="match_parent"
+                            android:layout_height="35dp"
+                            app:text_header_is_left_iv_visiable="true"
+                            app:text_header_title="@string/show_control" />
+
+                    <com.example.lkmagneticrobot.view.BaseButton
+                            android:id="@+id/btnSettingController"
+                            style="@style/BaseButton"
+                            android:layout_gravity="right|center"
+                            android:layout_width="80dp"
+                            android:layout_marginRight="10dp"
+                            android:text="@string/btn_sure"
+                            app:bg_corner="5dp"/>
+                </FrameLayout>
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -119,159 +197,10 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/yoke_control" />
-
-                        <com.kyleduo.switchbutton.SwitchButton
-                                style="@style/SwitchButtonStyle"
-                                app:kswTextAdjust="-2dp"
-                                app:kswTextExtra="8dp"
-                                app:kswTextOff="@string/yoke_up"
-                                app:kswTextOn="@string/yoke_down"
-                                app:kswTintColor="@color/theme_color" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="@string/magnetic_control" />
-
-                        <com.kyleduo.switchbutton.SwitchButton
-                                style="@style/SwitchButtonStyle"
-                                app:kswTextAdjust="-2dp"
-                                app:kswTextExtra="8dp"
-                                app:kswTextOff="@string/close"
-                                app:kswTextOn="@string/open"
-                                app:kswTintColor="@color/theme_color" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="@string/searchlight_control" />
-
-                        <com.kyleduo.switchbutton.SwitchButton
-                                style="@style/SwitchButtonStyle"
-                                app:kswTextAdjust="-2dp"
-                                app:kswTextExtra="8dp"
-                                app:kswTextOff="@string/close"
-                                app:kswTextOn="@string/open"
-                                app:kswTintColor="@color/theme_color" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:orientation="horizontal">
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="@string/solenoid_control" />
-
-                        <com.kyleduo.switchbutton.SwitchButton
-                                style="@style/SwitchButtonStyle"
-                                app:kswTextAdjust="-2dp"
-                                app:kswTextExtra="8dp"
-                                app:kswTextOff="@string/close"
-                                app:kswTextOn="@string/open"
-                                app:kswTintColor="@color/theme_color" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="@string/black_white_control" />
-
-                        <com.kyleduo.switchbutton.SwitchButton
-                                style="@style/SwitchButtonStyle"
-                                app:kswTextAdjust="-2dp"
-                                app:kswTextExtra="8dp"
-                                app:kswTextOff="@string/light_black"
-                                app:kswTextOn="@string/light_white"
-                                app:kswTintColor="@color/theme_color" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:visibility="invisible">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="333" />
-
-                        <com.kyleduo.switchbutton.SwitchButton
-                                style="@style/SwitchButtonStyle"
-                                app:kswTextAdjust="-2dp"
-                                app:kswTextExtra="8dp"
-                                app:kswTextOff="@string/light_black"
-                                app:kswTextOn="@string/light_white"
-                                app:kswTintColor="@color/theme_color" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1.7"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="4dp"
-                app:cardCornerRadius="10dp">
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                <com.example.lkmagneticrobot.view.BaseTitle
-                        android:layout_width="match_parent"
-                        android:layout_height="25dp"
-                        app:text_header_is_left_iv_visiable="true"
-                        app:text_header_title="@string/parameter_settings" />
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:orientation="horizontal">
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="@string/protect_voltage" />
+                                android:text="@string/protect_battery" />
 
                         <EditText
+                                android:id="@+id/etProtectBattery"
                                 style="@style/EditText"
                                 android:inputType="number" />
                     </LinearLayout>
@@ -287,8 +216,9 @@
                                 android:text="@string/protect_current" />
 
                         <EditText
+                                android:id="@+id/etProtectCurrent"
                                 style="@style/EditText"
-                                android:inputType="number" />
+                                android:inputType="number|numberDecimal" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -299,11 +229,12 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/run_speed" />
+                                android:text="@string/limitation_speed" />
 
                         <EditText
+                                android:id="@+id/etLimitationSpeed"
                                 style="@style/EditText"
-                                android:inputType="number" />
+                                android:inputType="number|numberDecimal" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -321,11 +252,118 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/run_distance" />
+                                android:text="@string/searchlight_control" />
 
-                        <EditText
+                        <com.kyleduo.switchbutton.SwitchButton
+                                android:id="@+id/sbSearchlight"
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/open"
+                                app:kswTextOn="@string/close"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="自动识别" />
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/open"
+                                app:kswTextOn="@string/close"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:id="@+id/linYoke"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/black_white_control" />
+                        <com.example.lkmagneticrobot.view.BaseButton
+                                android:id="@+id/etYoke"
                                 style="@style/EditText"
-                                android:inputType="number" />
+                                android:text="@string/light_white"
+                                android:inputType="number|numberDecimal"
+                                app:bg_corner="10dp"/>
+
+
+                        <com.kyleduo.switchbutton.SwitchButton
+                                android:id="@+id/sbYoke"
+                                android:visibility="gone"
+                                style="@style/SwitchButtonStyle"
+                                app:kswTextAdjust="-2dp"
+                                app:kswTextExtra="8dp"
+                                app:kswTextOff="@string/light_black"
+                                app:kswTextOn="@string/light_white"
+                                app:kswTintColor="@color/theme_color" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.3"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="4dp"
+                app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp">
+                    <com.example.lkmagneticrobot.view.BaseTitle
+                            android:layout_width="match_parent"
+                            android:layout_height="35dp"
+                            app:text_header_is_left_iv_visiable="true"
+                            app:text_header_title="@string/parameter_settings" />
+
+                    <com.example.lkmagneticrobot.view.BaseButton
+                            android:id="@+id/btnSettingParam"
+                            style="@style/BaseButton"
+                            android:layout_gravity="right|center"
+                            android:layout_width="80dp"
+                            android:layout_marginRight="10dp"
+                            android:text="@string/btn_sure"
+                            app:bg_corner="5dp"/>
+                </FrameLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/auto_speed" />
+                        <EditText
+                                android:id="@+id/etAutoSpeed"
+                                style="@style/EditText"
+                                android:inputType="number|numberDecimal" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -336,12 +374,36 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/magnetic_interval" />
+                                android:text="@string/auto_distance" />
 
                         <EditText
+                                android:id="@+id/etAutoDistance"
+                                style="@style/EditText"
+                                android:inputType="numberDecimal" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/magnetic_distance" />
+
+                        <EditText
+                                android:id="@+id/etMagneticDistance"
                                 style="@style/EditText"
                                 android:inputType="number" />
                     </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
 
                     <LinearLayout
                             android:layout_width="0dp"
@@ -354,28 +416,7 @@
                                 android:text="@string/magnetic_time" />
 
                         <EditText
-                                style="@style/EditText"
-                                android:inputType="number" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:orientation="horizontal">
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                        <TextView
-                                style="@style/TextName"
-                                android:text="@string/magnetic_voltage" />
-
-                        <EditText
+                                android:id="@+id/etMagneticTime"
                                 style="@style/EditText"
                                 android:inputType="number" />
                     </LinearLayout>
@@ -388,9 +429,10 @@
 
                         <TextView
                                 style="@style/TextName"
-                                android:text="@string/magnetic_rate" />
+                                android:text="@string/spray_time" />
 
                         <EditText
+                                android:id="@+id/etSprayTime"
                                 style="@style/EditText"
                                 android:inputType="number" />
                     </LinearLayout>
@@ -399,16 +441,19 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:visibility="invisible">
+                            android:orientation="vertical">
 
-                        <TextView style="@style/TextName" />
+                        <TextView
+                                style="@style/TextName"
+                                android:text="@string/spray_interval" />
 
                         <EditText
+                                android:id="@+id/etSprayInterval"
                                 style="@style/EditText"
                                 android:inputType="number" />
                     </LinearLayout>
                 </LinearLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -427,7 +472,7 @@
 
                 <com.example.lkmagneticrobot.view.BaseTitle
                         android:layout_width="match_parent"
-                        android:layout_height="25dp"
+                        android:layout_height="35dp"
                         app:text_header_is_left_iv_visiable="true"
                         app:text_header_title="@string/function_buttons" />
 
