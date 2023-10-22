@@ -66,4 +66,37 @@ object ByteDataChange {
         }
         return checkData.uppercase()
     }
+
+    //转hex字符串转字节数组
+    fun HexStringToByteArr(inHex: String): ByteArray //hex字符串转字节数组
+    {
+        var inHex = inHex
+        var hexlen = inHex.length
+        val result: ByteArray
+        if (isOdd(hexlen) == 1) { //奇数
+            hexlen++
+            result = ByteArray(hexlen / 2)
+            inHex = "0$inHex"
+        } else { //偶数
+            result = ByteArray(hexlen / 2)
+        }
+        var j = 0
+        var i = 0
+        while (i < hexlen) {
+            result[j] = HexToByte(inHex.substring(i, i + 2))
+            j++
+            i += 2
+        }
+        return result
+    }
+
+    // 判断奇数或偶数，位运算，最后一位是1则为奇数，为0是偶数
+    fun isOdd(num: Int): Int {
+        return num and 0x1
+    }
+
+    fun HexToByte(inHex: String): Byte //Hex字符串转byte
+    {
+        return inHex.toInt(16).toByte()
+    }
 }

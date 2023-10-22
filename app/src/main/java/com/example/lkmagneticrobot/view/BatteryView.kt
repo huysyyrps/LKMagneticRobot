@@ -74,7 +74,7 @@ import com.example.lkmagneticrobot.R
         canvas.drawRect(textRectF, paintFill)
         canvas.drawRoundRect(powerBodyRectF, 8.0f, 8.0f, paintPowerBody)
         canvas.drawRect(powerHeaderRectF, paintPowerHeader)
-        canvas.drawText(percent .toString(), (width / 2 - dip2px(6.5f)).toFloat(), (height - height * 2.3 / 5.5).toFloat(), paintText)
+        canvas.drawText(percent .toString(), (width / 2 - dip2px(3.5f)).toFloat(), (height - height * 2.3 / 6.5).toFloat(), paintText)
     }
 
     @Synchronized

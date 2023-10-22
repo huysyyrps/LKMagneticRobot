@@ -69,11 +69,11 @@ object String2ByteArrayUtils {
     /**
      * byte数组 转换成 16进制大写字符串
      */
-    fun bytes2Hex(bytes: ByteArray?): String? {
+    fun bytes2Hex(bytes: ByteArray): String {
 
-        if (bytes == null || bytes.isEmpty()) {
-            return null
-        }
+//        if (bytes == null || bytes.isEmpty()) {
+//            return null
+//        }
 
         val hex = StringBuilder()
         for (b in bytes) {
