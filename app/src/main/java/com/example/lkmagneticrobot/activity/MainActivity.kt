@@ -10,10 +10,12 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.lkmagneticrobot.R
@@ -29,7 +31,6 @@ import com.example.lkmagneticrobot.util.dialog.DialogUtil
 import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil
 import com.littlegreens.netty.client.listener.NettyClientListener
 import com.littlegreens.netty.client.status.ConnectState
-import com.skydroid.fpvlibrary.serial.SerialPortControl
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_right.*
 import kotlinx.coroutines.CoroutineScope
@@ -54,12 +55,8 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
     private lateinit var mediaManager: MediaProjectionManager
     private var mMediaProjection: MediaProjection? = null
     //FPV控制
-    private lateinit var mSerialPortControl: SerialPortControl
+//    private lateinit var mSerialPortControl: SerialPortControl
     val timer = Timer()
-    //天空端 服务IP
-    private val serverAddr = "192.168.144.101"
-    //TCP端口   14550对应uart0   14551对应uart1
-    private val serverPort = 14551
     //超时时间
     private val CONNECTION_TIMEOUT = 20 * 1000
     //输出流
@@ -76,6 +73,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
     //private var mSerialPortConnection: SerialPortConnection? = null
     private var pw: PrintWriter? = null
     private var socket: Socket? = null
+    var LEDState = Constant.LDGOPEN
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action === KeyEvent.ACTION_DOWN) {
@@ -137,33 +135,16 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         heightView.height = 100
 
         sbSearchlight.isChecked = false
-        //region
-        //硬件串口实例
-//        mSerialPortConnection = SerialPortConnection.newBuilder("/dev/ttyMSM1", 57600)
-//            .flags(1 shl 13)
-//            .build()
-//        mSerialPortConnection?.setDelegate(object : SerialPortConnection.Delegate {
-//            override fun received(bytes: ByteArray, size: Int) {
-//            }
-//
-//            override fun connect() {
-//            }
-//        })
-//        try {
-//            //打开串口
-//            mSerialPortConnection?.openConnection()
-//            LogUtil.e("TAG", "连接成功")
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-//        mSerialPortControl = SerialPortControl(mSerialPortConnection)
-//        sbSearchlight.setOnCheckedChangeListener { _, _ ->
-//            mSerialPortControl.toggleLED();// 开关LED
-//        }
-        //endregion
+        sbSearchlight.setOnCheckedChangeListener { _, isChecked: Boolean ->
+            LEDState = if (isChecked){
+                Constant.LDGOPEN
+            }else{
+                Constant.CLOSE
+            }
+            Thread { connectServer() }.start()
+        }
 //        //初始化连接
 //        initConnect()
-        //链接socket
         connectSocket()
 
         //定时读取
@@ -172,11 +153,28 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         }
     }
 
+    private fun connectServer() {
+        var socket: Socket? = null
+        while (socket == null) {
+            try {
+                socket = Socket(Constant.CONTROLLERIP, Constant.CONTROLLERPORT)
+                this.socket = socket
+                pw = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())), true)
+                pw?.write(LEDState)
+                pw?.flush()
+                socket.shutdownInput();
+                socket.close();
+            } catch (e: IOException) {
+                SystemClock.sleep(1000)
+            }
+        }
+    }
+
 
     //链接socket
     fun connectSocket() {
         baseTcpClient = BaseTcpClient.getInstance()
-        mNettyTcpClient = baseTcpClient?.initTcpClient(serverAddr, serverPort)
+        mNettyTcpClient = baseTcpClient?.initTcpClient(Constant.SERVERIP, Constant.SERVERPORT)
         mNettyTcpClient?.setListener(this) //设置TCP监听
         baseTcpClient?.tcpClientConntion(mNettyTcpClient)
     }
@@ -185,7 +183,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         Thread{
             try {
                 socket =  Socket()
-                socket?.connect( InetSocketAddress(serverAddr, serverPort), CONNECTION_TIMEOUT)
+                socket?.connect( InetSocketAddress("serverAddr", 1), CONNECTION_TIMEOUT)
                 Thread.sleep(1000)
                 mavOut =  BufferedOutputStream((socket?.getOutputStream()))
                 mavIn =  BufferedInputStream(socket?.getInputStream())
