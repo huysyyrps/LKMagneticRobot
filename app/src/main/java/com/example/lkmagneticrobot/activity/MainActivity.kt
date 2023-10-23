@@ -5,30 +5,26 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.CompoundButton
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.lkmagneticrobot.R
 import com.example.lkmagneticrobot.constant.BaseActivity
 import com.example.lkmagneticrobot.constant.Constant
 import com.example.lkmagneticrobot.util.*
-import com.example.lkmagneticrobot.util.BinaryChange.toBytes
 import com.example.lkmagneticrobot.util.Netty.BaseTcpClient
 import com.example.lkmagneticrobot.util.Netty.BytesHexChange
 import com.example.lkmagneticrobot.util.Netty.NettyTcpClient
 import com.example.lkmagneticrobot.util.Netty.SendCallBack
 import com.example.lkmagneticrobot.util.dialog.DialogUtil
 import com.example.lkmagneticrobot.util.mediaprojection.MediaUtil
+import com.example.lkmagneticrobot.util.thread.BaseThread
 import com.littlegreens.netty.client.listener.NettyClientListener
 import com.littlegreens.netty.client.status.ConnectState
 import kotlinx.android.synthetic.main.activity_main.*
@@ -37,13 +33,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.*
-import java.net.HttpURLConnection
-import java.net.InetSocketAddress
 import java.net.Socket
-import java.net.URL
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
-import kotlin.system.exitProcess
 
 class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<String> {
     var runing = true
@@ -56,8 +48,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
     var mNettyTcpClient: NettyTcpClient? = null
     var baseTcpClient: BaseTcpClient? = null
     var firstData = ""
-    private var pw: PrintWriter? = null
-    private var socket: Socket? = null
+    var secondData = ""
     var LEDState = Constant.LDGOPEN
 
 
@@ -80,7 +71,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
                 object : Thread() {
                     override fun run() {
                         while (runing) {
-                            getVideoPhoto()
+                            BaseThread.getVideoPhoto(imageView)
                         }
                     }
                 }.start()
@@ -114,7 +105,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
             }else{
                 Constant.CLOSE
             }
-            Thread { connectServer() }.start()
+            BaseThread.ManController(LEDState)
         }
 //        //初始化连接
         connectSocket()
@@ -124,24 +115,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
             fpvWidget.invalidate()
         }
     }
-
-    private fun connectServer() {
-        var socket: Socket? = null
-        while (socket == null) {
-            try {
-                socket = Socket(Constant.CONTROLLERIP, Constant.CONTROLLERPORT)
-                this.socket = socket
-                pw = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())), true)
-                pw?.write(LEDState)
-                pw?.flush()
-                socket.shutdownInput();
-                socket.close();
-            } catch (e: IOException) {
-                SystemClock.sleep(1000)
-            }
-        }
-    }
-
 
     //链接socket
     private fun connectSocket() {
@@ -255,62 +228,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
     }
 
 
-    private fun getVideoPhoto() {
-        try {
-            var inputstream: InputStream? = null
-            //创建一个URL对象
-            val videoUrl = URL("${Constant.URL}?action=snapshot")
-            //利用HttpURLConnection对象从网络中获取网页数据
-            val conn = videoUrl.openConnection() as HttpURLConnection
-            //设置输入流
-            conn.doInput = true
-            conn.connectTimeout = 3000
-            conn.readTimeout = 3000
-            //连接
-            conn.connect()
-            //得到网络返回的输入流
-            inputstream = conn.inputStream
-            //创建出一个bitmap
-            bmp = BitmapFactory.decodeStream(inputstream)
-            //region
-//            var objects: Array<YoloV5Ncnn.Obj>
-//            CoroutineScope(Dispatchers.Main).launch {
-//                objects = yolov5ncnn.Detect(bmp, false)
-//                if (objects == null || objects.isEmpty()) {
-//                    imageView.setImageBitmap(bmp)
-//                } else {
-//                    val rgba = bmp.copy(Bitmap.Config.ARGB_8888, true)
-//                    val canvas = Canvas(rgba)
-//                    for (i in objects!!.indices) {
-//                        canvas.drawRect(
-//                            objects[i].x,
-//                            objects[i].y, objects[i].x + objects[i].w, objects[i].y + objects[i].h, BasePaint.getLinePaint()
-//                        )
-//                        val text = objects[i].label + " = " + String.format("%.1f", objects[i].prob * 100) + "%"
-//                        val text_width: Float = BasePaint.getTextpaint().measureText(text) + 10
-//                        val text_height: Float = -BasePaint.getTextpaint().ascent() + BasePaint.getTextpaint().descent() + 10
-//                        var x = objects[i].x
-//                        var y = objects[i].y - text_height
-//                        if (y < 0) y = 0f
-//                        if (x + text_width > rgba.width) x = rgba.width - text_width
-//                        canvas.drawText(
-//                            text, x, y - BasePaint.getTextpaint().ascent(),
-//                            BasePaint.getTextpaint()
-//                        )
-//                    }
-//                    imageView.setImageBitmap(rgba)
-//                }
-//            }
-            //endregion
-            imageView.setImageBitmap(bmp)
-            //关闭HttpURLConnection连接
-            conn.disconnect()
-        } catch (ex: Exception) {
-            Log.e("XXX", ex.toString())
-        } finally {
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("WrongConstant")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -350,48 +267,53 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
     }
 
     override fun onMessageResponseClient(backData: String, index: Int) {
-        //region
-//        //6为帧头、命令码、检验的长度和
-//        Log.e("TAG", backData!!)
-//        var stringData = ""
-//        if (backData.startsWith("B10")&&backData.endsWith("XXX")){
-//            stringData = backData
-//        }else if (backData.startsWith("B10") && !backData.endsWith("XXX")){
-//            if (backData.contains("XXX")){
-//                var token = StringTokenizer(backData, "XXX");
-//                stringData = token.nextToken()+"XXX"
+        Log.e("TAG", backData!!)
+//region
+        var stringData = ""
+        if (backData.startsWith("B1")&&backData.endsWith("0D0A")){
+            stringData = backData
+            firstData = ""
+            analysisData(stringData)
+            return
+        }else if (backData.startsWith("B1") && !backData.endsWith("0D0A")){
+//            if (backData.contains("0D0A")){
+//                var token = StringTokenizer(backData, "0D0A");
+//                stringData = token.nextToken()+"0D0A"
+//                firstData = ""
 //                var endData = backData.replace(stringData,"")
-//                if (endData.startsWith("B10")){
+//                if (endData.startsWith("B1")){
 //                    firstData = endData
 //                }
+//                return
 //            }else{
 //                firstData = backData
 //                return
 //            }
-//        }else if (!backData.startsWith("B10") && backData.endsWith("XXX")){
-//            if (firstData.isNullOrEmpty()){
-//                stringData = firstData+backData
-//            }
-//        }else if (!backData.startsWith("B10") && !backData.endsWith("XXX")){
-//            firstData+=backData
-//            return
-//        }
-        //endregion
-        var stringData = ""
-        if (backData.startsWith("B10")){
+            Log.e("TAG","开始B1,结束不是$backData" )
             firstData = backData
             return
-        }else{
-            stringData = firstData+backData
+        }else if (backData.endsWith("0D0A") && !backData.startsWith("B1")){
+            if (firstData.isNotEmpty()){
+                stringData = firstData+backData
+                firstData = ""
+                Log.e("TAG","开始不是,结束是$backData" )
+                analysisData(stringData)
+                return
+            }
+        }else if (!backData.startsWith("B1") && !backData.endsWith("0D0A")){
+            firstData+=backData
+            return
         }
+    }
+    private fun analysisData(stringData:String){
         Log.e("TAG", stringData!!)
-        if (stringData.startsWith("B101") && stringData.length == 10) {
+        if (stringData.startsWith("B101") && stringData.length == 14) {
             if (ByteDataChange.HexStringToBytes(stringData.substring(0, 8)) == stringData.subSequence(8, 10)) {
                 val data = BytesHexChange.HexStringToByteArr("A10101A3")
                 sendData(data)
             }
         }
-        if (stringData.startsWith("B102") && stringData.length == 40) {
+        if (stringData.startsWith("B102") && stringData.length == 44) {
             if (ByteDataChange.HexStringToBytes(stringData.substring(0, 38)) == stringData.subSequence(38, 40)) {
                 //主电源电量
                 val battery = Integer.valueOf(stringData.substring(6, 8), 16)
@@ -429,9 +351,18 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
                         }
                     }
                 }
+                // region
+                // 定时读取
+//                                    timer.scheduleAtFixedRate(0, 1000) {
+//                                        val arrayData = toBytes("A10206A8")
+//                                        mServiceConnection?.sendData(arrayData)
+//                                    }
+                //endregion
+                val data = BytesHexChange.HexStringToByteArr("A10206A9")
+                sendData(data)
             }
         }
-        if (stringData.startsWith("B103") && stringData.length == 30) {
+        if (stringData.startsWith("B103") && stringData.length == 34) {
             if (ByteDataChange.HexStringToBytes(stringData.substring(0, 28)) == stringData.subSequence(28, 30)) {
                 //保护电量
                 val protectBattery: Int = Integer.valueOf(stringData.substring(6, 8), 16)
@@ -446,21 +377,14 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
                     etProtectCurrent.setText("$protectCurrent")
                     etLimitationSpeed.setText("$limitation_speed")
                     if (changeElectQuantity==0){
-                        sbYoke.isSelected = true
+                        etYoke.text = resources.getText(R.string.light_white)
                     }else if (changeElectQuantity==1){
-                        sbYoke.isSelected = false
+                        etYoke.text = resources.getText(R.string.light_black)
                     }
                 }
-                //region
-//                                    //定时读取
-//                                    timer.scheduleAtFixedRate(0, 1000) {
-//                                        val arrayData = toBytes("A10206A8")
-//                                        mServiceConnection?.sendData(arrayData)
-//                                    }
-                //endregion
             }
         }
-        if (stringData.startsWith("B104") && stringData.length == 34) {
+        if (stringData.startsWith("B104") && stringData.length == 38) {
             if (ByteDataChange.HexStringToBytes(stringData.substring(0, 32)) == stringData.subSequence(32, 34)) {
                 //自动运行速度
                 val autoSpeed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(6, 14), 16))
@@ -485,6 +409,8 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
             }
         }
     }
+
+
 
     override fun onClientStatusConnectChanged(statusCode: Int, index: Int) {
         //连接状态回调
