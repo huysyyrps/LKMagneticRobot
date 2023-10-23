@@ -45,49 +45,21 @@ import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.system.exitProcess
 
-
-//, View.OnClickListener
 class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<String> {
     var runing = true
     lateinit var bmp: Bitmap
-    private var exitTime: Long = 0
+
 //    private val yolov5ncnn = YoloV5Ncnn()
     private lateinit var mediaManager: MediaProjectionManager
     private var mMediaProjection: MediaProjection? = null
-    //FPV控制
-//    private lateinit var mSerialPortControl: SerialPortControl
     val timer = Timer()
-    //超时时间
-    private val CONNECTION_TIMEOUT = 20 * 1000
-    //输出流
-    private var mavOut : BufferedOutputStream? = null
-    //输入流
-    public var mavIn : BufferedInputStream? = null
-    //读取线程
-    private var mReadThread : ReadThread? = null
-
     var mNettyTcpClient: NettyTcpClient? = null
     var baseTcpClient: BaseTcpClient? = null
     var firstData = ""
-    //usb连接实例
-    //private var mSerialPortConnection: SerialPortConnection? = null
     private var pw: PrintWriter? = null
     private var socket: Socket? = null
     var LEDState = Constant.LDGOPEN
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.action === KeyEvent.ACTION_DOWN) {
-            if (System.currentTimeMillis() - exitTime > 2000) {
-                Toast.makeText(applicationContext, "再按一次退出程序", Toast.LENGTH_SHORT).show()
-                exitTime = System.currentTimeMillis()
-            } else {
-                finish()
-                exitProcess(0)
-            }
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
-    }
 
     @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("SetTextI18n")
@@ -96,10 +68,12 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         setContentView(R.layout.activity_main)
         //不息屏
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//region
 //        if (!yolov5ncnn.Init(assets)) {
 //            "yolov5ncnn Init failed".showToast(this)
 //            return
 //        }
+//endregion
         //是否通过全部权限
         DialogUtil().requestPermission(this, object : PermissionallBack {
             override fun permissionState(state: Boolean) {
@@ -112,9 +86,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
                 }.start()
             }
         })
-        //设置播放地址
-        fpvWidget.url = "rtsp://192.168.144.108:554/stream=0"
-        //开始播放
+        fpvWidget.url = Constant.FPVURL
         fpvWidget.start()
         //使用硬解
         fpvWidget?.usingMediaCodec = true
@@ -134,6 +106,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         heightView.HeightView()
         heightView.height = 100
 
+        //控制LED开关
         sbSearchlight.isChecked = false
         sbSearchlight.setOnCheckedChangeListener { _, isChecked: Boolean ->
             LEDState = if (isChecked){
@@ -144,10 +117,9 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
             Thread { connectServer() }.start()
         }
 //        //初始化连接
-//        initConnect()
         connectSocket()
 
-        //定时读取
+        //定时读取防止视频长时间卡顿
         timer.scheduleAtFixedRate(0, 1000*60) {
             fpvWidget.invalidate()
         }
@@ -172,302 +144,11 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
 
 
     //链接socket
-    fun connectSocket() {
+    private fun connectSocket() {
         baseTcpClient = BaseTcpClient.getInstance()
         mNettyTcpClient = baseTcpClient?.initTcpClient(Constant.SERVERIP, Constant.SERVERPORT)
         mNettyTcpClient?.setListener(this) //设置TCP监听
         baseTcpClient?.tcpClientConntion(mNettyTcpClient)
-    }
-
-    private fun initConnect() {
-        Thread{
-            try {
-                socket =  Socket()
-                socket?.connect( InetSocketAddress("serverAddr", 1), CONNECTION_TIMEOUT)
-                Thread.sleep(1000)
-                mavOut =  BufferedOutputStream((socket?.getOutputStream()))
-                mavIn =  BufferedInputStream(socket?.getInputStream())
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            mReadThread = ReadThread()
-            mReadThread?.start()
-        }.start()
-        /**
-         *  //硬件串口实例
-        mServiceConnection = SerialPortConnection.newBuilder("/dev/ttyMSM1", 115200)
-        .flags(1 shl 13)
-        .build()
-        mServiceConnection?.setDelegate(object : SerialPortConnection.Delegate {
-        @SuppressLint("SetTextI18n")
-        override fun received(bytes: ByteArray, size: Int) {
-        val stringData = ByteDataChange.ByteToString(bytes)
-        Log.e("TAG", stringData)
-        //在设备上电后1S周期向遥控器接收端发送包含遥控器通讯帧率的数据包
-        if (stringData.startsWith("B101") && stringData.length == 10) {
-        if (ByteDataChange.HexStringToBytes(stringData.substring(0, 8)) == stringData.subSequence(8, 10)) {
-        val arrayData = toBytes("A10101A3")
-        mServiceConnection?.sendData(arrayData)
-        }
-        }
-        if (stringData.startsWith("B103") && stringData.length == 30) {
-        if (ByteDataChange.HexStringToBytes(stringData.substring(0, 28)) == stringData.subSequence(28, 30)) {
-        //保护电量
-        val protectBattery: Int = Integer.valueOf(stringData.substring(6, 8), 16)
-        //磁轭补光灯类型
-        val changeElectQuantity = Integer.valueOf(stringData.substring(8, 10), 16)
-        //保护电流
-        val protectCurrent = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(10, 18), 16))
-        //上限制速度
-        val limitation_speed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(18, 26), 16))
-        CoroutineScope(Dispatchers.Main).launch {
-        etProtectBattery.setText("$protectBattery")
-        etProtectCurrent.setText("$protectCurrent")
-        etLimitationSpeed.setText("$limitation_speed")
-        if (changeElectQuantity==0){
-        sbYoke.isSelected = true
-        }else if (changeElectQuantity==1){
-        sbYoke.isSelected = false
-        }
-        }
-        //定时读取
-        timer.scheduleAtFixedRate(0, 1000) {
-        val arrayData = toBytes("A10206A8")
-        mServiceConnection?.sendData(arrayData)
-        }
-        }
-        }
-        if (stringData.startsWith("B104") && stringData.length == 32) {
-        if (ByteDataChange.HexStringToBytes(stringData.substring(0, 30)) == stringData.subSequence(30, 32)) {
-        //自动运行速度
-        val autoSpeed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(6, 14), 16))
-        //自动运行距离
-        val autoDistance = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(14, 22), 16))
-        //间隔磁化距离
-        val magneticDistance = Integer.valueOf(stringData.substring(22, 24), 16)
-        //单点磁化时间
-        val magneticTime = Integer.valueOf(stringData.substring(24, 26), 16)
-        //喷涂时间
-        val sprayTime = Integer.valueOf(stringData.substring(26, 28), 16)
-        //喷涂时间
-        val sprayInterval = Integer.valueOf(stringData.substring(28, 30), 16)
-        CoroutineScope(Dispatchers.Main).launch {
-        etAutoSpeed.setText("$autoSpeed")
-        etAutoDistance.setText("$autoDistance")
-        etMagneticDistance.setText("$magneticDistance")
-        etMagneticTime.setText("$magneticTime")
-        etSprayTime.setText("$sprayTime")
-        etSprayInterval.setText("$sprayInterval")
-        }
-        }
-        }
-        if (stringData.startsWith("B102") && stringData.length == 40) {
-        if (ByteDataChange.HexStringToBytes(stringData.substring(0, 28)) == stringData.subSequence(28, 30)) {
-        //主电源电量
-        val battery = Integer.valueOf(stringData.substring(6, 8), 16)
-        //当前工作电流
-        val workCurrent = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(8, 16), 16))
-        //行进距离
-        val distance = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(16, 24), 16))
-        //行进速度
-        val speed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(24, 32), 16))
-        //当前抬升位置
-        val height = Integer.valueOf(stringData.substring(32, 34), 16)
-        //运行模式
-        val runType = Integer.valueOf(stringData.substring(34, 36), 16)
-        //遥控器通讯帧率
-        val frequency = Integer.valueOf(stringData.substring(36, 38), 16)
-        CoroutineScope(Dispatchers.Main).launch {
-        batteryView.BatteryView()
-        batteryView.setProgress(battery,0)
-        etWorkCurrent.setText("$workCurrent")
-        etDistance.setText("$distance")
-        etSpeed.setText("$speed")
-        etFrequency.setText("$frequency")
-        heightView.HeightView()
-        heightView.height = height
-        tvHeight.text = "抬升高度$height"
-        when (runType) {
-        0 -> {
-        etRunType.setText(resources.getString(R.string.hand_type))
-        }
-        1 -> {
-        etRunType.setText(resources.getString(R.string.semi_auto))
-        }
-        2 -> {
-        etRunType.setText(resources.getString(R.string.auto))
-        }
-        }
-        }
-        //定时读取
-        timer.scheduleAtFixedRate(0, 1000) {
-        val arrayData = toBytes("A10206A8")
-        mServiceConnection?.sendData(arrayData)
-        }
-        }
-        }
-        }
-
-        override fun connect() {
-        LogUtil.e("TAG", "数传连接成功")
-        timer.scheduleAtFixedRate(0, 1000) {
-        val arrayData = toBytes("A1")
-        mServiceConnection?.sendData(
-        arrayData
-        )
-        }
-
-        }
-        })
-        try {
-        //打开串口
-        mServiceConnection?.openConnection()
-        //            LogUtil.e("TAG", "连接成功")
-        //            mServiceConnection.sendData("".toByteArray())
-        } catch (e: java.lang.Exception) {
-        e.printStackTrace()
-        }
-        mSerialPortControl = SerialPortControl(mServiceConnection)
-         */
-    }
-
-    /**
-     * 数据读取线程
-     */
-    inner class ReadThread:Thread(){
-        override fun run() {
-            try {
-                var buf = ByteArray(256)
-                var size = 0
-                while (!isInterrupted ){
-                    if(mavIn != null){
-                        sleep(1000)
-                        var len = mavIn!!.read(buf)
-                        if(len > 0){
-                            var tempArray = ByteArray(len)
-                            System.arraycopy(buf,0,tempArray,0,len)
-                            var stringData = String2ByteArrayUtils.bytes2Hex(tempArray)
-                            if (stringData != null) {
-                                LogUtil.e("TAG",stringData)
-                            }
-                            if (stringData.startsWith("B101") && stringData.length == 10) {
-                                if (ByteDataChange.HexStringToBytes(stringData.substring(0, 8)) == stringData.subSequence(8, 10)) {
-                                    sendData("A10101A3")
-                                }
-                            }
-                            if (stringData.startsWith("B102") && stringData.length == 40) {
-                                if (ByteDataChange.HexStringToBytes(stringData.substring(0, 38)) == stringData.subSequence(38, 40)) {
-                                    //主电源电量
-                                    val battery = Integer.valueOf(stringData.substring(6, 8), 16)
-                                    //当前工作电流
-                                    val workCurrent = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(8, 16), 16))
-                                    //行进距离
-                                    val distance = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(16, 24), 16))
-                                    //行进速度
-                                    val speed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(24, 32), 16))
-                                    //当前抬升位置
-                                    val height = Integer.valueOf(stringData.substring(32, 34), 16)
-                                    //运行模式
-                                    val runType = Integer.valueOf(stringData.substring(34, 36), 16)
-                                    //遥控器通讯帧率
-                                    val frequency = Integer.valueOf(stringData.substring(36, 38), 16)
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        batteryView.BatteryView()
-                                        batteryView.setProgress(battery,0)
-                                        etWorkCurrent.setText("$workCurrent")
-                                        etDistance.setText("$distance")
-                                        etSpeed.setText("$speed")
-                                        etFrequency.setText("$frequency")
-                                        heightView.HeightView()
-                                        heightView.height = height
-                                        tvHeight.text = "抬升高度$height"
-                                        when (runType) {
-                                            0 -> {
-                                                etRunType.setText(resources.getString(R.string.hand_type))
-                                            }
-                                            1 -> {
-                                                etRunType.setText(resources.getString(R.string.semi_auto))
-                                            }
-                                            2 -> {
-                                                etRunType.setText(resources.getString(R.string.auto))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if (stringData.startsWith("B103") && stringData.length == 30) {
-                                if (ByteDataChange.HexStringToBytes(stringData.substring(0, 28)) == stringData.subSequence(28, 30)) {
-                                    //保护电量
-                                    val protectBattery: Int = Integer.valueOf(stringData.substring(6, 8), 16)
-                                    //磁轭补光灯类型
-                                    val changeElectQuantity = Integer.valueOf(stringData.substring(8, 10), 16)
-                                    //保护电流
-                                    val protectCurrent = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(10, 18), 16))
-                                    //上限制速度
-                                    val limitation_speed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(18, 26), 16))
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        etProtectBattery.setText("$protectBattery")
-                                        etProtectCurrent.setText("$protectCurrent")
-                                        etLimitationSpeed.setText("$limitation_speed")
-                                        if (changeElectQuantity==0){
-                                            sbYoke.isSelected = true
-                                        }else if (changeElectQuantity==1){
-                                            sbYoke.isSelected = false
-                                        }
-                                    }
-//                                    //定时读取
-//                                    timer.scheduleAtFixedRate(0, 1000) {
-//                                        val arrayData = toBytes("A10206A8")
-//                                        mServiceConnection?.sendData(arrayData)
-//                                    }
-                                }
-                            }
-                            if (stringData.startsWith("B104") && stringData.length == 34) {
-                                if (ByteDataChange.HexStringToBytes(stringData.substring(0, 32)) == stringData.subSequence(32, 34)) {
-                                    //自动运行速度
-                                    val autoSpeed = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(6, 14), 16))
-                                    //自动运行距离
-                                    val autoDistance = java.lang.Float.intBitsToFloat(Integer.valueOf(stringData.substring(14, 22), 16))
-                                    //间隔磁化距离
-                                    val magneticDistance = Integer.valueOf(stringData.substring(22, 24), 16)
-                                    //单点磁化时间
-                                    val magneticTime = Integer.valueOf(stringData.substring(24, 26), 16)
-                                    //喷涂时间
-                                    val sprayTime = Integer.valueOf(stringData.substring(26, 28), 16)
-                                    //喷涂时间
-                                    val sprayInterval = Integer.valueOf(stringData.substring(28, 30), 16)
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        etAutoSpeed.setText("$autoSpeed")
-                                        etAutoDistance.setText("$autoDistance")
-                                        etMagneticDistance.setText("$magneticDistance")
-                                        etMagneticTime.setText("$magneticTime")
-                                        etSprayTime.setText("$sprayTime")
-                                        etSprayInterval.setText("$sprayInterval")
-                                    }
-                                }
-                            }
-                        }
-                        }
-                    }
-            }catch (e:InterruptedException){
-                e.printStackTrace()
-            }catch (e: IOException){
-                e.printStackTrace()
-            }
-
-        }
-    }
-
-    /**
-     * 发送数据
-     */
-    private fun sendData(data: String) {
-        Thread{
-//            var arrayData = "A10101A3".toByteArray()
-            val arrayData = toBytes(data)
-            mavOut?.write(arrayData)
-            mavOut?.flush()
-        }.start()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -552,7 +233,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
                     }
 
                 })
-//                startActivity(Intent(this,UsbSerialActivity::class.java))
             }
         }
     }
@@ -592,6 +272,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
             inputstream = conn.inputStream
             //创建出一个bitmap
             bmp = BitmapFactory.decodeStream(inputstream)
+            //region
 //            var objects: Array<YoloV5Ncnn.Obj>
 //            CoroutineScope(Dispatchers.Main).launch {
 //                objects = yolov5ncnn.Detect(bmp, false)
@@ -620,7 +301,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
 //                    imageView.setImageBitmap(rgba)
 //                }
 //            }
-
+            //endregion
             imageView.setImageBitmap(bmp)
             //关闭HttpURLConnection连接
             conn.disconnect()
@@ -654,14 +335,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         super.onDestroy()
         fpvWidget.stop()
         mNettyTcpClient?.disconnect()
-//        if (mServiceConnection != null) {
-//            try {
-//                mServiceConnection!!.closeConnection()
-//            } catch (e: IOException) {
-//                e.printStackTrace()
-//            }
-//        }
-//        mServiceConnection = null
     }
 
     //发送数据
@@ -714,7 +387,8 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         Log.e("TAG", stringData!!)
         if (stringData.startsWith("B101") && stringData.length == 10) {
             if (ByteDataChange.HexStringToBytes(stringData.substring(0, 8)) == stringData.subSequence(8, 10)) {
-                sendData("A10101A3")
+                val data = BytesHexChange.HexStringToByteArr("A10101A3")
+                sendData(data)
             }
         }
         if (stringData.startsWith("B102") && stringData.length == 40) {
@@ -817,8 +491,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, NettyClientListener<S
         when (statusCode) {
             ConnectState.STATUS_CONNECT_SUCCESS -> {
                 Log.e("TAG", "成功")
-                val data = BytesHexChange.HexStringToByteArr("A10101A3")
-                sendData(data)
             }
             ConnectState.STATUS_CONNECT_CLOSED -> {
                 Log.e("TAG", "断开")

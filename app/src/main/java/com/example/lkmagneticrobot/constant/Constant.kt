@@ -17,4 +17,5 @@ object Constant {
     const val SERVERIP = "192.168.144.101"
     //TCP端口   14550对应uart0   14551对应uart1
     const val SERVERPORT = 14551
+    const val FPVURL = "rtsp://192.168.144.108:554/stream=0"
 }
